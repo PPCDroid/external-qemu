@@ -80,6 +80,16 @@ void do_mouse_set(int index);
 void kbd_put_keysym(int keysym);
 
 /* consoles */
+struct PixelFormat {
+    uint8_t bits_per_pixel;
+    uint8_t bytes_per_pixel;
+    uint8_t depth; /* color depth in bits */
+    uint32_t rmask, gmask, bmask, amask;
+    uint8_t rshift, gshift, bshift, ashift;
+    uint8_t rmax, gmax, bmax, amax;
+    uint8_t rbits, gbits, bbits, abits;
+};
+
 
 struct DisplayState {
     uint8_t *data;
@@ -88,6 +98,9 @@ struct DisplayState {
     int bgr; /* BGR color order instead of RGB. Only valid for depth == 32 */
     int width;
     int height;
+
+    struct PixelFormat pf;
+
     void *opaque;
     struct QEMUTimer *gui_timer;
     uint64_t gui_timer_interval;
@@ -106,6 +119,38 @@ struct DisplayState {
                           uint8_t *image, uint8_t *mask);
 };
 
+static inline int ds_get_linesize(DisplayState *ds)
+{
+    return ds->linesize;
+}
+
+static inline uint8_t* ds_get_data(DisplayState *ds)
+{
+    return ds->data;
+}
+
+static inline int ds_get_width(DisplayState *ds)
+{
+    return ds->width;
+}
+
+static inline int ds_get_height(DisplayState *ds)
+{
+    return ds->height;
+}
+
+static inline int ds_get_bits_per_pixel(DisplayState *ds)
+{
+    return ds->pf.bits_per_pixel;
+}
+
+static inline int ds_get_bytes_per_pixel(DisplayState *ds)
+{
+    return ds->pf.bytes_per_pixel;
+}
+
+
+
 static inline void dpy_update(DisplayState *s, int x, int y, int w, int h)
 {
     s->dpy_update(s, x, y, w, h);
@@ -121,6 +166,13 @@ static inline void dpy_cursor(DisplayState *s, int x, int y)
     if (s->dpy_text_cursor)
         s->dpy_text_cursor(s, x, y);
 }
+
+static inline void dpy_copy(struct DisplayState *s, int src_x, int src_y,
+                             int dst_x, int dst_y, int w, int h) {
+    if (s->dpy_copy)
+        s->dpy_copy(s, src_x, src_y, dst_x, dst_y, w, h);
+}
+
 
 typedef unsigned long console_ch_t;
 static inline void console_write_ch(console_ch_t *dest, uint32_t ch)

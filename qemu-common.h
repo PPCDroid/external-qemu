@@ -28,6 +28,9 @@
 #define ENOMEDIUM ENODEV
 #endif
 
+#define qemu_loglevel_mask(mask)	(0)
+#define qemu_log(format...) /* empty */
+
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -36,7 +39,6 @@
 #define ENOTSUP 4096
 extern int qemu_ftruncate64(int, int64_t);
 #define ftruncate qemu_ftruncate64
-
 
 static inline char *realpath(const char *path, char *resolved_path)
 {
@@ -133,6 +135,9 @@ typedef struct PCIBus PCIBus;
 typedef struct PCIDevice PCIDevice;
 typedef struct SerialState SerialState;
 typedef struct IRQState *qemu_irq;
+typedef struct DisplaySurface DisplaySurface;
+typedef struct DisplayChangeListener DisplayChangeListener;
+typedef struct PixelFormat PixelFormat;
 struct pcmcia_card_s;
 
 /* CPU save/load.  */

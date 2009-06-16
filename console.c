@@ -1343,3 +1343,73 @@ void qemu_console_resize(QEMUConsole *console, int width, int height)
         }
     }
 }
+
+void qemu_console_copy(DisplayState *ds, int src_x, int src_y,
+                       int dst_x, int dst_y, int w, int h)
+{
+    if (is_graphic_console())
+        dpy_copy(ds, src_x, src_y, dst_x, dst_y, w, h);
+
+}
+PixelFormat qemu_default_pixelformat(int bpp)
+{
+    PixelFormat pf;
+
+    memset(&pf, 0x00, sizeof(PixelFormat));
+
+    pf.bits_per_pixel = bpp;
+    pf.bytes_per_pixel = bpp / 8;
+    pf.depth = bpp == 32 ? 24 : bpp;
+
+    switch (bpp) {
+        case 16:
+            pf.rmask = 0x0000F800;
+            pf.gmask = 0x000007E0;
+            pf.bmask = 0x0000001F;
+            pf.rmax = 31;
+            pf.gmax = 63;
+            pf.bmax = 31;
+            pf.rshift = 11;
+            pf.gshift = 5;
+            pf.bshift = 0;
+            pf.rbits = 5;
+            pf.gbits = 6;
+            pf.bbits = 5;
+            break;
+        case 24:
+            pf.rmask = 0x00FF0000;
+            pf.gmask = 0x0000FF00;
+            pf.bmask = 0x000000FF;
+            pf.rmax = 255;
+            pf.gmax = 255;
+            pf.bmax = 255;
+            pf.rshift = 16;
+            pf.gshift = 8;
+            pf.bshift = 0;
+            pf.rbits = 8;
+            pf.gbits = 8;
+            pf.bbits = 8;
+        case 32:
+            pf.rmask = 0x00FF0000;
+            pf.gmask = 0x0000FF00;
+            pf.bmask = 0x000000FF;
+            pf.amax = 255;
+            pf.rmax = 255;
+            pf.gmax = 255;
+            pf.bmax = 255;
+            pf.ashift = 24;
+            pf.rshift = 16;
+            pf.gshift = 8;
+            pf.bshift = 0;
+            pf.rbits = 8;
+            pf.gbits = 8;
+            pf.bbits = 8;
+            pf.abits = 8;
+            break;
+        default:
+            break;
+    }
+    return pf;
+}
+
+

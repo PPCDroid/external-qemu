@@ -38,6 +38,12 @@ void qemu_set_irq(qemu_irq irq, int level)
     irq->handler(irq->opaque, irq->n, level);
 }
 
+void qemu_free_irqs(qemu_irq *s)
+{
+    qemu_free(s[0]);
+    qemu_free(s);
+}
+
 qemu_irq *qemu_allocate_irqs(qemu_irq_handler handler, void *opaque, int n)
 {
     qemu_irq *s;

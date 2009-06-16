@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _EXEC_ALL_H_
+#define _EXEC_ALL_H_
 /* allow to see translation results - the slowdown should be negligible, so we leave it */
 #define DEBUG_DISAS
 
@@ -336,7 +338,7 @@ static inline target_ulong get_phys_addr_code(CPUState *env1, target_ulong addr)
     pd = env1->tlb_table[mmu_idx][page_index].addr_code & ~TARGET_PAGE_MASK;
     if (pd > IO_MEM_ROM && !(pd & IO_MEM_ROMD)) {
 #if defined(TARGET_SPARC) || defined(TARGET_MIPS)
-        do_unassigned_access(addr, 0, 1, 0);
+        do_unassigned_access(addr, 0, 1, 0, 4);
 #else
         cpu_abort(env1, "Trying to execute code outside RAM or ROM at 0x" TARGET_FMT_lx "\n", addr);
 #endif
@@ -390,3 +392,4 @@ static inline int kqemu_is_ok(CPUState *env)
 }
 
 #endif
+#endif /* _EXEC_ALL_H_ */

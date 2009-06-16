@@ -213,6 +213,7 @@ int vm_running;
 static int rtc_utc = 1;
 static int rtc_date_offset = -1; /* -1 means no change */
 int cirrus_vga_enabled = 1;
+int std_vga_enabled = 0;
 int vmsvga_enabled = 0;
 #ifdef TARGET_SPARC
 int graphic_width = 1024;
@@ -5360,7 +5361,7 @@ static const char *get_opt_value(char *buf, int buf_size, const char *p)
     return p;
 }
 
-static int get_param_value(char *buf, int buf_size,
+int get_param_value(char *buf, int buf_size,
                            const char *tag, const char *str)
 {
     const char *p;
