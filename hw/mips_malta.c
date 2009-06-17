@@ -448,13 +448,18 @@ static MaltaFPGAState *malta_fpga_init(target_phys_addr_t base, qemu_irq uart_ir
     /* 0xa00 is less than a page, so will still get the right offsets.  */
     cpu_register_physical_memory(base + 0xa00, 0x100000 - 0xa00, malta);
 
-    s->display = qemu_chr_open("vc:320x200");
+    s->display = qemu_chr_open("vc");
+    qemu_chr_printf(s->display, "\e[HMalta LEDBAR\r\n");
+    qemu_chr_printf(s->display, "+--------+\r\n");
+    qemu_chr_printf(s->display, "+        +\r\n");
+    qemu_chr_printf(s->display, "+--------+\r\n");
+    qemu_chr_printf(s->display, "\n");
+    qemu_chr_printf(s->display, "Malta ASCII\r\n");
+    qemu_chr_printf(s->display, "+--------+\r\n");
+    qemu_chr_printf(s->display, "+        +\r\n");
+    qemu_chr_printf(s->display, "+--------+\r\n");
 
     s->uart = serial_mm_init(base + 0x900, 3, uart_irq, 230400, uart_chr, 1);
-
-    
-    /* Keyboard (i8042) */
-    //i8042_mm_init(uart_irq+1, uart_irq+2, base+0x2000, 0x1000, 0x1);
 
     malta_fpga_reset(s);
     qemu_register_reset(malta_fpga_reset, s);
@@ -500,7 +505,7 @@ static void network_init (PCIBus *pci_bus)
             /* The malta board has a PCNet card using PCI SLOT 11 */
             devfn = 88;
 
-        pci_nic_init(pci_bus, nd, devfn, NULL);
+        pci_nic_init(pci_bus, nd, devfn);
     }
 }
 
@@ -946,11 +951,11 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
 
     /* Optional PCI video card */
     if (cirrus_vga_enabled) {
-        pci_cirrus_vga_init(pci_bus, ds, phys_ram_base + ram_size,
+       pci_cirrus_vga_init(pci_bus, ds, phys_ram_base + ram_size,
                             ram_size, vga_ram_size);
     } else if (std_vga_enabled) {
-//        pci_vga_init(pci_bus, phys_ram_base + ram_size,
-//                     ram_size, vga_ram_size, 0, 0);
+        pci_vga_init(pci_bus, ds, phys_ram_base + ram_size,
+                     ram_size, vga_ram_size, 0, 0);
     }
 }
 

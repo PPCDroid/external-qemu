@@ -149,6 +149,16 @@ static uint8_t expand4to8[16];
 
 static void vga_screen_dump(void *opaque, const char *filename);
 
+static void vga_dumb_update_retrace_info(VGAState *s)
+{
+    (void) s;
+}
+
+static uint8_t vga_dumb_retrace(VGAState *s)
+{
+    return s->st01 ^ (ST01_V_RETRACE | ST01_DISP_ENABLE);
+}
+
 static uint32_t vga_ioport_read(void *opaque, uint32_t addr)
 {
     VGAState *s = opaque;
@@ -1862,6 +1872,9 @@ void vga_common_init(VGAState *s, DisplayState *ds, uint8_t *vga_ram_base,
         }
         expand4to8[i] = v;
     }
+
+    s->retrace = vga_dumb_retrace;
+    s->update_retrace_info = vga_dumb_update_retrace_info;
 
     vga_reset(s);
 

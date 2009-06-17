@@ -1187,6 +1187,7 @@ static void text_console_update(void *opaque, console_ch_t *chardata)
     }
 }
 
+PixelFormat qemu_default_pixelformat(int bpp);
 static TextConsole *new_console(DisplayState *ds, console_type_t console_type)
 {
     TextConsole *s;
@@ -1198,6 +1199,7 @@ static TextConsole *new_console(DisplayState *ds, console_type_t console_type)
     if (!s) {
         return NULL;
     }
+    ds->pf = qemu_default_pixelformat(32); // XXX
     if (!active_console || ((active_console->console_type != GRAPHIC_CONSOLE) &&
         (console_type == GRAPHIC_CONSOLE))) {
         active_console = s;

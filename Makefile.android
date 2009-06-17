@@ -14,6 +14,9 @@ MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g \
              -fno-PIC \
              -falign-functions=0 \
              -fomit-frame-pointer \
+	     -DTARGET_ARM
+
+MY_LDFLAGS :=
 
 # Overwrite configuration for debug builds.
 #
@@ -576,8 +579,9 @@ MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g \
              -fno-PIC \
              -falign-functions=0 \
              -fomit-frame-pointer \
+	     -DTARGET_MIPS
 
-:wqMY_LDFLAGS :=
+MY_LDFLAGS :=
 
 # this is needed to build the emulator on 64-bit Linux systems
 ifeq ($(HOST_OS)-$(HOST_ARCH),linux-x86)
