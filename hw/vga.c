@@ -1619,7 +1619,7 @@ static void vga_draw_blank(VGAState *s, int full_update)
 #define GMODE_GRAPH    1
 #define GMODE_BLANK 2
 
-static void vga_update_display(void *opaque)
+void vga_update_display(void *opaque)
 {
     VGAState *s = (VGAState *)opaque;
     int full_update, graphic_mode;

@@ -31,6 +31,10 @@
 #include "pci.h"
 #include "console.h"
 #include "vga_int.h"
+#include "framebuffer.h"
+
+#include "framebuffer.h"
+
 //#include "kvm.h"
 
 #define vga_dirty_log_start(unused) 		/* */
@@ -292,6 +296,7 @@ typedef struct CirrusVGAState {
     CPUWriteMemoryFunc **cirrus_linear_write;
     int device_id;
     int bustype;
+    QFrameBuffer*  qfbuff;
 } CirrusVGAState;
 
 typedef struct PCICirrusVGAState {
@@ -3209,6 +3214,20 @@ static void cirrus_reset(void *opaque)
     s->cirrus_hidden_dac_data = 0;
 }
 
+static void  cirrus_detach(void*  opaque)
+{
+    struct CirrusVGAState *s = opaque;
+    s->qfbuff = NULL;
+}
+
+extern void vga_update_display(void *opaque);
+static void cirrus_vga_update_display(void *opaque)
+{
+     CirrusVGAState *s = opaque;
+     vga_update_display(opaque);
+     qframebuffer_rotate( s->qfbuff, 1 );
+}
+
 static void cirrus_init_common(CirrusVGAState * s, int device_id, int is_pci)
 {
     int i;
@@ -3290,6 +3309,14 @@ static void cirrus_init_common(CirrusVGAState * s, int device_id, int is_pci)
     s->cursor_invalidate = cirrus_cursor_invalidate;
     s->cursor_draw_line = cirrus_cursor_draw_line;
 
+    s->update = cirrus_vga_update_display;
+    s->qfbuff = qframebuffer_fifo_get();
+    qframebuffer_set_producer( s->qfbuff, s,
+                               s->update,
+                               s->invalidate,
+                               cirrus_detach );
+
+  
     qemu_register_reset(cirrus_reset, s);
     cirrus_reset(s);
     register_savevm("cirrus_vga", 0, 2, cirrus_vga_save, cirrus_vga_load, s);
@@ -3311,8 +3338,8 @@ void isa_cirrus_vga_init(DisplayState *ds, uint8_t *vga_ram_base,
     vga_common_init((VGAState *)s, ds,
                     vga_ram_base, vga_ram_offset, vga_ram_size);
     cirrus_init_common(s, CIRRUS_ID_CLGD5430, 0);
-    graphic_console_init(s->ds, s->update, s->invalidate,
-                                 s->screen_dump, s->text_update, s);
+//    graphic_console_init(s->ds, s->update, s->invalidate,
+//                                 s->screen_dump, s->text_update, s);
     /* XXX ISA-LFB support */
 }
 
@@ -3400,8 +3427,8 @@ void pci_cirrus_vga_init(PCIBus *bus, DisplayState *ds, uint8_t *vga_ram_base,
                     vga_ram_base, vga_ram_offset, vga_ram_size);
     cirrus_init_common(s, device_id, 1);
 
-    graphic_console_init(s->ds, s->update, s->invalidate,
-                                 s->screen_dump, s->text_update, s);
+//    graphic_console_init(s->ds, s->update, s->invalidate,
+//                                 s->screen_dump, s->text_update, s);
 
     s->pci_dev = (PCIDevice *)d;
 
