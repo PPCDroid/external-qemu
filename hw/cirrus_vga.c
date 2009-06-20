@@ -3223,9 +3223,122 @@ static void  cirrus_detach(void*  opaque)
 extern void vga_update_display(void *opaque);
 static void cirrus_vga_update_display(void *opaque)
 {
-     CirrusVGAState *s = opaque;
-     vga_update_display(opaque);
-     qframebuffer_rotate( s->qfbuff, 1 );
+    CirrusVGAState *s = opaque;
+    uint32_t addr;
+    uint32_t base;
+
+    uint8_t*  dst_line;
+    uint8_t*  src_line;
+    int y_first = -1, y_last = 0;
+    int full_update = 1; // XXX
+    int    width, height, pitch;
+
+    vga_update_display(opaque);
+
+    base = s->vram_offset;
+    if(base == 0)
+        return;
+
+    addr  = base;
+
+    src_line = phys_ram_base + base;
+    dst_line  = s->qfbuff->pixels;
+    pitch     = s->qfbuff->pitch;
+    width     = s->qfbuff->width;
+    height    = s->qfbuff->height;
+
+    if (full_update)
+    {
+        int  yy;
+
+        for (yy = 0; yy < height; yy++, dst_line += pitch, src_line += width*2)
+        {
+            uint16_t*  src = (uint16_t*) src_line;
+            uint16_t*  dst = (uint16_t*) dst_line;
+            int        nn;
+
+            for (nn = 0; nn < width; nn++) {
+                unsigned   spix = src[nn];
+                unsigned   dpix = dst[nn];
+#if WORDS_BIGENDIAN
+                spix = ((spix << 8) | (spix >> 8)) & 0xffff;
+#else
+                if (spix != dpix)
+                    break;
+#endif
+            }
+
+            if (nn == width)
+                continue;
+
+#if WORDS_BIGENDIAN
+            for ( ; nn < width; nn++ ) {
+                unsigned   spix = src[nn];
+                dst[nn] = (uint16_t)((spix << 8) | (spix >> 8));
+            }
+#else
+            memcpy( dst+nn, src+nn, (width-nn)*2 );
+#endif
+
+            y_first = (y_first < 0) ? yy : y_first;
+            y_last  = yy;
+        }
+    }
+    else  /* not a full update, should not happen very often with Android */
+    {
+        int  yy;
+
+        for (yy = 0; yy < height; yy++, dst_line += pitch, src_line += width*2)
+        {
+            uint16_t*  src   = (uint16_t*) src_line;
+            uint16_t*  dst   = (uint16_t*) dst_line;
+            int        len   = width*2;
+#if WORDS_BIGENDIAN
+            int        nn;
+#endif
+            int        dirty = 0;
+
+            while (len > 0) {
+                int  len2 = TARGET_PAGE_SIZE - (addr & (TARGET_PAGE_SIZE-1));
+
+                if (len2 > len)
+                    len2 = len;
+
+                dirty |= cpu_physical_memory_get_dirty(addr, VGA_DIRTY_FLAG);
+                addr  += len2;
+                len   -= len2;
+            }
+
+            if (!dirty)
+                continue;
+
+#if WORDS_BIGENDIAN
+            for (nn = 0; nn < width; nn++ ) {
+                unsigned   spix = src[nn];
+                dst[nn] = (uint16_t)((spix << 8) | (spix >> 8));
+            }
+#else
+            memcpy( dst, src, width*2 );
+#endif
+
+            y_first = (y_first < 0) ? yy : y_first;
+            y_last  = yy;
+        }
+    }
+
+    if (y_first < 0)
+      return;
+
+    y_last += 1;
+    //printf("goldfish_fb_update_display %d %d, base %x\n", first, last, base);
+
+    cpu_physical_memory_reset_dirty(base + y_first * width * 2,
+                                    base + y_last * width * 2,
+                                    VGA_DIRTY_FLAG);
+
+    qframebuffer_update( s->qfbuff, 0, y_first, width, y_last-y_first );
+
+     qframebuffer_rotate( s->qfbuff, 0 );
 }
 
 static void cirrus_init_common(CirrusVGAState * s, int device_id, int is_pci)
@@ -3338,8 +3451,8 @@ void isa_cirrus_vga_init(DisplayState *ds, uint8_t *vga_ram_base,
     vga_common_init((VGAState *)s, ds,
                     vga_ram_base, vga_ram_offset, vga_ram_size);
     cirrus_init_common(s, CIRRUS_ID_CLGD5430, 0);
-//    graphic_console_init(s->ds, s->update, s->invalidate,
-//                                 s->screen_dump, s->text_update, s);
+    graphic_console_init(s->ds, s->update, s->invalidate,
+                                 s->screen_dump, s->text_update, s);
     /* XXX ISA-LFB support */
 }
 
@@ -3427,8 +3540,8 @@ void pci_cirrus_vga_init(PCIBus *bus, DisplayState *ds, uint8_t *vga_ram_base,
                     vga_ram_base, vga_ram_offset, vga_ram_size);
     cirrus_init_common(s, device_id, 1);
 
-//    graphic_console_init(s->ds, s->update, s->invalidate,
-//                                 s->screen_dump, s->text_update, s);
+    graphic_console_init(s->ds, s->update, s->invalidate,
+                                 s->screen_dump, s->text_update, s);
 
     s->pci_dev = (PCIDevice *)d;
 
