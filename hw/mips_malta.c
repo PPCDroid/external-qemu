@@ -471,24 +471,11 @@ static MaltaFPGAState *malta_fpga_init(target_phys_addr_t base, qemu_irq uart_ir
 #ifdef HAS_AUDIO
 static void audio_init (PCIBus *pci_bus)
 {
-    struct soundhw *c;
-    int audio_enabled = 0;
+    AudioState *s;
+    extern int es1370_init(PCIBus *, AudioState *);
 
-    for (c = soundhw; !audio_enabled && c->name; ++c) {
-        audio_enabled = c->enabled;
-    }
-
-    if (audio_enabled) {
-        AudioState *s;
-
-        s = AUD_init ();
-        if (s) {
-            for (c = soundhw; c->name; ++c) {
-                if (c->enabled)
-                    c->init.init_pci (pci_bus, s);
-            }
-        }
-    }
+    s = AUD_init ();
+    es1370_init (pci_bus, s);
 }
 #endif
 
