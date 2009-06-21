@@ -29,6 +29,7 @@
 #include "hw.h"
 #include "audiodev.h"
 #include "audio/audio.h"
+#include "qemu_debug.h"
 #include "pci.h"
 
 /* Missing stuff:
@@ -438,6 +439,9 @@ static void es1370_update_voices (ES1370State *s, uint32_t ctl, uint32_t sctl)
                             es1370_adc_callback,
                             &as
                             );
+                    if (!s->adc_voice)
+                        dprint("%s: warning: opening audio input failed\n",
+                               __func__);
                 }
                 else {
                     s->dac_voice[i] =
@@ -449,6 +453,9 @@ static void es1370_update_voices (ES1370State *s, uint32_t ctl, uint32_t sctl)
                             i ? es1370_dac2_callback : es1370_dac1_callback,
                             &as
                             );
+                    if (!s->dac_voice[i])
+                        dprint("%s: warning: opening audio output %d failed\n",
+                               __func__, i);
                 }
             }
         }
