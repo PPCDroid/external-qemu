@@ -726,12 +726,16 @@ static int64_t load_kernel (CPUState *env)
 
     /* Store command line.  */
     prom_set(index++, loaderparams.kernel_filename);
-    if (initrd_size > 0)
-        prom_set(index++, "rd_start=0x" TARGET_FMT_lx " rd_size=%li %s",
+    if (0 && initrd_size > 0) // XXX: temp
+        prom_set(index++, "rd_start=0x" TARGET_FMT_lx " rd_size=%li %s %s",
                  PHYS_TO_VIRT(initrd_offset), initrd_size,
-                 loaderparams.kernel_cmdline);
+                 loaderparams.kernel_cmdline,
+		 " cirrusfb.rgb565=1 cirrusfb.mode_option=320x480-16");
     else
-        prom_set(index++, loaderparams.kernel_cmdline);
+        prom_set(index++, "%s %s %s %s", loaderparams.kernel_cmdline,
+                 "cirrusfb.rgb565=1 cirrusfb.mode_option=320x480-16",
+                 "root=/dev/hda",
+                 "init=/init");
 
     /* Setup minimum environment variables */
     prom_set(index++, "memsize");
