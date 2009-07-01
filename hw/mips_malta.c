@@ -811,10 +811,8 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     }
     cpu_register_physical_memory(0, ram_size, IO_MEM_RAM);
 
-    /* Map the bios at two physical locations, as on the real board. */
+    /* Map the bios */
     bios_offset = ram_size + vga_ram_size;
-    cpu_register_physical_memory(0x1e000000LL,
-                                 BIOS_SIZE, bios_offset | IO_MEM_ROM);
     cpu_register_physical_memory(0x1fc00000LL,
                                  BIOS_SIZE, bios_offset | IO_MEM_ROM);
 
@@ -832,48 +830,10 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
         env->CP0_Status &= ~((1 << CP0St_BEV) | (1 << CP0St_ERL));
         write_bootloader(env, bios_offset, kernel_entry);
     } else {
-        index = drive_get_index(IF_PFLASH, 0, fl_idx);
-        if (index != -1) {
-            /* Load firmware from flash. */
-            bios_size = 0x400000;
-            fl_sectors = bios_size >> 16;
-#ifdef DEBUG_BOARD_INIT
-            printf("Register parallel flash %d size " TARGET_FMT_lx " at "
-                   "offset %08lx addr %08llx '%s' %x\n",
-                   fl_idx, bios_size, bios_offset, 0x1e000000LL,
-                   bdrv_get_device_name(drives_table[index].bdrv), fl_sectors);
-#endif
-//            pflash_cfi01_register(0x1e000000LL, bios_offset,
-//                                  drives_table[index].bdrv, 65536, fl_sectors,
-// XXX!                                  4, 0x0000, 0x0000, 0x0000, 0x0000);
-            fl_idx++;
-        } else {
-            /* Load a BIOS image. */
-            if (bios_name == NULL)
-                bios_name = BIOS_FILENAME;
-            snprintf(buf, sizeof(buf), "%s/%s", bios_dir, bios_name);
-            bios_size = load_image(buf, phys_ram_base + bios_offset);
-            if ((bios_size < 0 || bios_size > BIOS_SIZE) && !kernel_filename) {
-                fprintf(stderr,
-                        "qemu: Could not load MIPS bios '%s', and no -kernel argument was specified\n",
-                        buf);
-                exit(1);
-            }
-        }
-        /* In little endian mode the 32bit words in the bios are swapped,
-           a neat trick which allows bi-endian firmware. */
-#ifndef TARGET_WORDS_BIGENDIAN
-        {
-            uint32_t *addr;
-            for (addr = (uint32_t *)(phys_ram_base + bios_offset);
-                 addr < (uint32_t *)(phys_ram_base + bios_offset + bios_size);
-                 addr++) {
-                *addr = bswap32(*addr);
-            }
-        }
-#endif
+        dprint("Will not boot w/o kernel image supplied");
+        exit(1);
     }
-
+    
     /* Board ID = 0x420 (Malta Board with CoreLV)
        XXX: theoretically 0x1e000010 should map to flash and 0x1fc00010 should
        map to the board ID. */
@@ -916,6 +876,8 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     }
     pit = pit_init(0x40, i8259[0]);
     DMA_init(0);
+
+    events_dev_init(0x1e400000, i8259[13]);
 
     /* Super I/O */
     i8042_init(i8259[1], i8259[12], 0x60);

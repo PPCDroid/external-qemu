@@ -704,7 +704,8 @@ HW_SOURCES := irq.c \
 	      smbus_eeprom.c \
 	      mc146818rtc.c \
 	      cirrus_vga.c \
-	      silverbox_nand.c
+	      silverbox_nand.c \
+	      silverbox_keypad.c
 	      
 
 LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
