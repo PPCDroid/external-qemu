@@ -14,7 +14,7 @@ MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g \
              -fno-PIC \
              -falign-functions=0 \
              -fomit-frame-pointer \
-	     -DTARGET_ARM
+	     -DTARGET_ARM -D_GNU_SOURCE
 
 MY_LDFLAGS :=
 
@@ -579,7 +579,7 @@ MY_CFLAGS := $(CONFIG_INCLUDES) -O2 -g \
              -fno-PIC \
              -falign-functions=0 \
              -fomit-frame-pointer \
-	     -DTARGET_MIPS
+	     -DTARGET_MIPS -D_GNU_SOURCE
 
 MY_LDFLAGS :=
 
