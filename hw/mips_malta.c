@@ -483,16 +483,14 @@ static void audio_init (PCIBus *pci_bus)
 static void network_init (PCIBus *pci_bus)
 {
     int i;
+    NICInfo *nd = &nd_table[0];
+    int devfn = -1;
+    extern void pci_pcnet_init(PCIBus *bus, NICInfo *nd, int devfn);
 
-    for(i = 0; i < nb_nics; i++) {
-        NICInfo *nd = &nd_table[i];
-        int devfn = -1;
-
-        if (i == 0 && (!nd->model || strcmp(nd->model, "pcnet") == 0))
-            /* The malta board has a PCNet card using PCI SLOT 11 */
-            devfn = 88;
-
-        pci_nic_init(pci_bus, nd, devfn);
+    if (!nd->model || strcmp(nd->model, "pcnet") == 0) {
+        /* The malta board has a PCNet card using PCI SLOT 11 */
+        devfn = 88;
+        pci_pcnet_init(pci_bus, nd, devfn);
     }
 }
 
@@ -877,7 +875,7 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     pit = pit_init(0x40, i8259[0]);
     DMA_init(0);
 
-    events_dev_init(0x1e400000, i8259[13]);
+//    events_dev_init(0x1e400000, i8259[7]);
 
     /* Super I/O */
     i8042_init(i8259[1], i8259[12], 0x60);
