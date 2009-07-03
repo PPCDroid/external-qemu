@@ -875,11 +875,12 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     pit = pit_init(0x40, i8259[0]);
     DMA_init(0);
 
-//    events_dev_init(0x1e400000, i8259[7]);
+    events_dev_init(0x1e000000, i8259[7]);
 
     /* Super I/O */
     i8042_init(i8259[1], i8259[12], 0x60);
     rtc_state = rtc_init(0x70, i8259[8]);
+    silverbox_rtc_init(0x1e000800);
     serial_init(0x3f8, i8259[4], 115200, serial_hds[0]);
     serial_init(0x2f8, i8259[3], 115200, serial_hds[1]);
     if (parallel_hds[0])

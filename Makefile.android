@@ -705,6 +705,7 @@ HW_SOURCES := irq.c \
 	      mc146818rtc.c \
 	      cirrus_vga.c \
 	      pcnet.c \
+	      silverbox_rtc.c \
 	      silverbox_nand.c \
 	      silverbox_keypad.c
 	      
