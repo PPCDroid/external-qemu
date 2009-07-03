@@ -377,7 +377,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
 
     iomemtype = cpu_register_io_memory(0, events_readfn, events_writefn, s);
 
-    cpu_register_physical_memory(base, 0xfff, iomemtype);
+    cpu_register_physical_memory(base, 0x800, iomemtype);
 
     qemu_add_kbd_event_handler(events_put_keycode, s);
     qemu_add_mouse_event_handler(events_put_mouse, s, 1, "silvermouse");
