@@ -423,7 +423,7 @@ void nand_dev_init(uint32_t base)
 
     s = (nand_dev_state *)qemu_mallocz(sizeof(nand_dev_state));
     iomemtype = cpu_register_io_memory(0, nand_dev_readfn, nand_dev_writefn, s);
-    cpu_register_physical_memory(base, 0x00000fff, iomemtype);
+    cpu_register_physical_memory(base, 0x00000400, iomemtype);
     s->base = base;
 
     register_savevm( "nand_dev", instance_id++, NAND_DEV_STATE_SAVE_VERSION,
