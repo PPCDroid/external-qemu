@@ -39,6 +39,8 @@
 
 //#define DEBUG_BOARD_INIT
 
+extern void silverbox_mmc_init(uint32_t base, qemu_irq irq, int id, BlockDriverState* bs);
+
 #ifdef TARGET_WORDS_BIGENDIAN
 #define BIOS_FILENAME "mips_bios.bin"
 #else
@@ -880,6 +882,10 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
 #ifdef CONFIG_NAND
     nand_dev_init(0x1e000800);
 #endif
+
+    /* if no sdcard image supplied, report card not present */
+    index = drive_get_index( IF_IDE, 0, 0);
+    silverbox_mmc_init(0x1e000c00, i8259[5], 0, index >= 0 ? drives_table[index].bdrv : NULL);
 
     /* Super I/O */
     rtc_state = rtc_init(0x70, i8259[8]);

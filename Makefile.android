@@ -707,7 +707,8 @@ HW_SOURCES := irq.c \
 	      pcnet.c \
 	      silverbox_rtc.c \
 	      silverbox_nand.c \
-	      silverbox_events.c
+	      silverbox_events.c \
+	      silverbox_mmc.c
 	      
 
 LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
