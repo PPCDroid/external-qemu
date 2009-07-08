@@ -724,16 +724,15 @@ static int64_t load_kernel (CPUState *env)
 
     /* Store command line.  */
     prom_set(index++, loaderparams.kernel_filename);
-    if (0 && initrd_size > 0) // XXX: temp
+    if (initrd_size > 0)
         prom_set(index++, "rd_start=0x" TARGET_FMT_lx " rd_size=%li %s %s",
                  PHYS_TO_VIRT(initrd_offset), initrd_size,
                  loaderparams.kernel_cmdline,
-		 " cirrusfb.rgb565=1 cirrusfb.mode_option=320x480-16");
+		 "cirrusfb.rgb565=1 cirrusfb.mode_option=320x480-16");
     else
-        prom_set(index++, "%s %s %s %s", loaderparams.kernel_cmdline,
+        prom_set(index++, "%s %s %s", loaderparams.kernel_cmdline,
                  "cirrusfb.rgb565=1 cirrusfb.mode_option=320x480-16",
-                 "root=/dev/hda",
-                 "init=/init");
+                 "root=/dev/hda init=/init");
 
     /* Setup minimum environment variables */
     prom_set(index++, "memsize");
@@ -883,7 +882,6 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
 #endif
 
     /* Super I/O */
-    i8042_init(i8259[1], i8259[12], 0x60);
     rtc_state = rtc_init(0x70, i8259[8]);
     serial_init(0x3f8, i8259[4], 115200, serial_hds[0]);
     serial_init(0x2f8, i8259[3], 115200, serial_hds[1]);

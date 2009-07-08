@@ -707,7 +707,7 @@ HW_SOURCES := irq.c \
 	      pcnet.c \
 	      silverbox_rtc.c \
 	      silverbox_nand.c \
-	      silverbox_keypad.c
+	      silverbox_events.c
 	      
 
 LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
@@ -749,7 +749,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/isa_mmio.c			\
 		   hw/mips_int.c \
 		   hw/mips_timer.c \
-		   hw/mips_malta.c \
+		   hw/silverbox.c \
 		   hw/irq.c \
 	           hw/mc146818rtc.c \
 	           hw/piix_pci.c \
@@ -763,9 +763,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/cirrus_vga.c \
 		   hw/gt64xxx.c \
 		   hw/i8254.c \
-		   hw/pckbd.c \
 		   hw/pcnet.c \
-		   hw/ps2.c \
 		   hw/serial.c \
 		   hw/parallel.c \
 		   translate-all.c \
@@ -1037,7 +1035,7 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/utils/timezone.c \
               android/avd/hw-config.c \
               android/avd/info.c \
-	      hw/mips_malta.c
+	      hw/silverbox.c
 
 VL_SOURCES += hw/es1370.c
 
