@@ -3334,7 +3334,13 @@ static void cirrus_vga_update_display(void *opaque)
 
     qframebuffer_update( s->qfbuff, 0, y_first, width, y_last-y_first );
 
-     qframebuffer_rotate( s->qfbuff, 0 );
+    {
+        static int do_rotate = 1;
+        if (do_rotate) {
+            qframebuffer_rotate( s->qfbuff, 0 );
+            do_rotate = 0;
+        }
+    }
 }
 
 static void cirrus_init_common(CirrusVGAState * s, int device_id, int is_pci)
