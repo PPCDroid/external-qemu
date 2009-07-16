@@ -3216,7 +3216,6 @@ static void  cirrus_detach(void*  opaque)
     s->qfbuff = NULL;
 }
 
-extern void vga_update_display(void *opaque);
 static void cirrus_vga_update_display(void *opaque)
 {
     CirrusVGAState *s = opaque;
@@ -3228,8 +3227,6 @@ static void cirrus_vga_update_display(void *opaque)
     int y_first = -1, y_last = 0;
     int full_update = 1; // XXX
     int    width, height, pitch;
-
-    vga_update_display(opaque);
 
     base = s->vram_offset;
     if(base == 0)

@@ -704,6 +704,7 @@ HW_SOURCES := irq.c \
 	      smbus_eeprom.c \
 	      mc146818rtc.c \
 	      cirrus_vga.c \
+	      vga.c \
 	      pcnet.c \
 	      silverbox_rtc.c \
 	      silverbox_nand.c \
@@ -760,7 +761,6 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 	           hw/i2c.c \
 	           hw/smbus.c \
 	           hw/smbus_eeprom.c \
-		   hw/vga.c \
 		   hw/cirrus_vga.c \
 		   hw/gt64xxx.c \
 		   hw/i8254.c \
