@@ -749,6 +749,7 @@ static int cpu_gdb_read_registers(CPUState *env, uint8_t *mem_buf)
     *(target_ulong *)ptr = 0;
     ptr += sizeof(target_ulong);
 
+#if 0 /* XXX: temporary hack */
     /* Registers for embedded use, we just pad them. */
     for (i = 0; i < 16; i++)
       {
@@ -759,6 +760,7 @@ static int cpu_gdb_read_registers(CPUState *env, uint8_t *mem_buf)
     /* Processor ID. */
     *(target_ulong *)ptr = (int32_t)tswap32(env->CP0_PRid);
     ptr += sizeof(target_ulong);
+#endif
 
     return ptr - mem_buf;
 }
