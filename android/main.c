@@ -1740,7 +1740,13 @@ int main(int argc, char **argv)
     int    shell_serial = 0;
     int    dns_count = 0;
     unsigned  cachePartitionSize = 0;
+#if defined (TARGET_ARM)
     unsigned  defaultPartitionSize = 0x4200000;
+#elif defined (TARGET_MIPS)
+    unsigned  defaultPartitionSize = 0x14a00000;
+#else
+#error Unknown architecture
+#endif
 
     AndroidHwConfig*  hw;
 
@@ -2291,9 +2297,10 @@ int main(int argc, char **argv)
     {
         const char*  filetype = "file";
 
+/*
         if (avdInfo_isImageReadOnly(android_avdInfo, AVD_IMAGE_INITSYSTEM))
             filetype = "initfile";
-
+*/
         bufprint(tmp, tmpend,
              "system,size=0x%x,%s=%s", defaultPartitionSize, filetype,
              avdInfo_getImageFile(android_avdInfo, AVD_IMAGE_INITSYSTEM));
