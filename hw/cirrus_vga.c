@@ -3224,8 +3224,7 @@ static void cirrus_vga_update_display(void *opaque)
 
     uint8_t*  dst_line;
     uint8_t*  src_line;
-    int y_first = -1, y_last = 0;
-    int full_update = 1; // XXX
+    int y_first = -1, y_last = 0, n;
     int    width, height, pitch;
 
     base = s->vram_offset;
@@ -3240,7 +3239,8 @@ static void cirrus_vga_update_display(void *opaque)
     width     = s->qfbuff->width;
     height    = s->qfbuff->height;
 
-    if (full_update)
+    n = width;
+
     {
         int  yy;
 
@@ -3263,6 +3263,8 @@ static void cirrus_vga_update_display(void *opaque)
 
             if (nn == width)
                 continue;
+            if (n > nn)
+                n = nn;
 
 #if WORDS_BIGENDIAN
             for ( ; nn < width; nn++ ) {
@@ -3277,59 +3279,17 @@ static void cirrus_vga_update_display(void *opaque)
             y_last  = yy;
         }
     }
-    else  /* not a full update, should not happen very often with Android */
-    {
-        int  yy;
-
-        for (yy = 0; yy < height; yy++, dst_line += pitch, src_line += width*2)
-        {
-            uint16_t*  src   = (uint16_t*) src_line;
-            uint16_t*  dst   = (uint16_t*) dst_line;
-            int        len   = width*2;
-#if WORDS_BIGENDIAN
-            int        nn;
-#endif
-            int        dirty = 0;
-
-            while (len > 0) {
-                int  len2 = TARGET_PAGE_SIZE - (addr & (TARGET_PAGE_SIZE-1));
-
-                if (len2 > len)
-                    len2 = len;
-
-                dirty |= cpu_physical_memory_get_dirty(addr, VGA_DIRTY_FLAG);
-                addr  += len2;
-                len   -= len2;
-            }
-
-            if (!dirty)
-                continue;
-
-#if WORDS_BIGENDIAN
-            for (nn = 0; nn < width; nn++ ) {
-                unsigned   spix = src[nn];
-                dst[nn] = (uint16_t)((spix << 8) | (spix >> 8));
-            }
-#else
-            memcpy( dst, src, width*2 );
-#endif
-
-            y_first = (y_first < 0) ? yy : y_first;
-            y_last  = yy;
-        }
-    }
 
     if (y_first < 0)
       return;
 
     y_last += 1;
-    //printf("goldfish_fb_update_display %d %d, base %x\n", first, last, base);
 
     cpu_physical_memory_reset_dirty(base + y_first * width * 2,
                                     base + y_last * width * 2,
                                     VGA_DIRTY_FLAG);
 
-    qframebuffer_update( s->qfbuff, 0, y_first, width, y_last-y_first );
+    qframebuffer_update( s->qfbuff, n, y_first, width, y_last-y_first );
 
     {
         static int do_rotate = 1;
