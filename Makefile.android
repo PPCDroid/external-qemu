@@ -704,6 +704,7 @@ HW_SOURCES := irq.c \
 	      acpi.c \
 	      mc146818rtc.c \
 	      cirrus_vga.c \
+	      silverbox_fb.c \
 	      vga.c \
 	      pcnet.c \
 	      silverbox_rtc.c \

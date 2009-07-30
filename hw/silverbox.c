@@ -150,7 +150,7 @@ static uint32_t silverbox_tty_read(void *opaque, target_phys_addr_t offset)
         case TTY_BYTES_READY:
             return s->data_count;
     default:
-        cpu_abort (cpu_single_env, "goldfish_tty_read: Bad offset %x\n", offset);
+        cpu_abort (cpu_single_env, "%s: Bad offset %x\n", __func__, offset);
         return 0;
     }
 }
@@ -222,7 +222,8 @@ static void silverbox_tty_write(void *opaque, target_phys_addr_t offset, uint32_
                     break;
 
                 default:
-                    cpu_abort (cpu_single_env, "silverbox_tty_write: Bad command %x\n", value);
+                    cpu_abort (cpu_single_env, "%s: Bad command %x\n",
+				__func__, value);
             };
             break;
 
@@ -277,7 +278,7 @@ static int silverbox_tty_add(CharDriverState *cs, int id, uint32_t base, qemu_ir
 
     s = qemu_mallocz(sizeof(*s));
     s->base = base;
-    s->size = 0x1000;
+    s->size = 0x400;
     s->irq = irq;
     s->irq_count = 1;
     s->cs = cs;
@@ -1118,6 +1119,9 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     /* Network card */
     network_init(pci_bus);
 
+#if 1
+    silverbox_fb_init(ds, 0x1e001400, i8259[12]);
+#else
     /* Optional PCI video card */
     if (cirrus_vga_enabled) {
        pci_cirrus_vga_init(pci_bus, ds, phys_ram_base + ram_size,
@@ -1126,6 +1130,7 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
         pci_vga_init(pci_bus, ds, phys_ram_base + ram_size,
                      ram_size, vga_ram_size, 0, 0);
     }
+#endif
 }
 
 QEMUMachine mips_malta_machine = {
