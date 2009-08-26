@@ -3129,7 +3129,8 @@ static CPUReadMemoryFunc *pmac_ide_read[] = {
 /* hd_table must contain 4 block drivers */
 /* PowerMac uses memory mapped registers, not I/O. Return the memory
    I/O index to access the ide. */
-int pmac_ide_init (BlockDriverState **hd_table, qemu_irq irq)
+int pmac_ide_init (BlockDriverState **hd_table, qemu_irq irq,
+                   void *dbdma, int channel, qemu_irq dma_irq)
 {
     IDEState *ide_if;
     int pmac_ide_memory;

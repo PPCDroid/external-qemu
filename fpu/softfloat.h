@@ -188,10 +188,15 @@ typedef struct float_status {
 #ifdef FLOATX80
     signed char floatx80_rounding_precision;
 #endif
+    flag flush_to_zero;
 } float_status;
 
 void set_float_rounding_mode(int val STATUS_PARAM);
 void set_float_exception_flags(int val STATUS_PARAM);
+INLINE void set_flush_to_zero(flag val STATUS_PARAM)
+{
+    STATUS(flush_to_zero) = val;
+}
 INLINE int get_float_exception_flags(float_status *status)
 {
     return STATUS(float_exception_flags);
@@ -257,6 +262,7 @@ float32 float32_mul( float32, float32 STATUS_PARAM );
 float32 float32_div( float32, float32 STATUS_PARAM );
 float32 float32_rem( float32, float32 STATUS_PARAM );
 float32 float32_sqrt( float32 STATUS_PARAM );
+float32 float32_log2( float32 STATUS_PARAM );
 int float32_eq( float32, float32 STATUS_PARAM );
 int float32_le( float32, float32 STATUS_PARAM );
 int float32_lt( float32, float32 STATUS_PARAM );
@@ -280,6 +286,7 @@ INLINE float32 float32_chs(float32 a)
 }
 
 #define float32_zero make_float32(0)
+#define float32_one make_float32(0x3f800000)
 
 /*----------------------------------------------------------------------------
 | Software IEC/IEEE double-precision conversion routines.
@@ -333,7 +340,23 @@ INLINE float64 float64_chs(float64 a)
     return make_float64(float64_val(a) ^ 0x8000000000000000LL);
 }
 
+INLINE int float64_is_infinity(float64 a)
+{
+    return (float64_val(a) & 0x7fffffffffffffffLL ) == 0x7ff0000000000000LL;
+}
+
+INLINE int float64_is_neg(float64 a)
+{
+    return float64_val(a) >> 63;
+}
+
+INLINE int float64_is_zero(float64 a)
+{
+    return (float64_val(a) & 0x7fffffffffffffffLL) == 0;
+}
+
 #define float64_zero make_float64(0)
+#define float64_one make_float64(0x3ff0000000000000LL)
 
 #ifdef FLOATX80
 
@@ -433,6 +456,20 @@ INLINE float128 float128_chs(float128 a)
     return a;
 }
 
+INLINE int float128_is_infinity(float128 a)
+{
+    return (a.high & 0x7fffffffffffffffLL) == 0x7fff000000000000LL && a.low == 0;
+}
+
+INLINE int float128_is_neg(float128 a)
+{
+    return a.high >> 63;
+}
+
+INLINE int float128_is_zero(float128 a)
+{
+    return (a.high & 0x7fffffffffffffffLL) == 0 && a.low == 0;
+}
 #endif
 
 #else /* CONFIG_SOFTFLOAT */

@@ -66,6 +66,8 @@ static inline char *realpath(const char *path, char *resolved_path)
 
 #endif /* !defined(NEED_CPU_H) */
 
+#define qemu_isxdigit(c)	isxdigit((unsigned char)(c))
+
 /* bottom halves */
 typedef struct QEMUBH QEMUBH;
 

@@ -15,6 +15,40 @@ typedef uint32_t PCIConfigReadFunc(PCIDevice *pci_dev,
 typedef void PCIMapIORegionFunc(PCIDevice *pci_dev, int region_num,
                                 uint32_t addr, uint32_t size, int type);
 
+#define PCI_DEVFN(slot, func)   ((((slot) & 0x1f) << 3) | ((func) & 0x07))
+#define PCI_SLOT(devfn)         (((devfn) >> 3) & 0x1f)
+#define PCI_FUNC(devfn)         ((devfn) & 0x07)
+
+#define PCI_BASE_CLASS_STORAGE           0x01
+#define PCI_BASE_CLASS_NETWORK           0x02
+
+#define PCI_CLASS_STORAGE_SCSI           0x0100
+#define PCI_CLASS_STORAGE_IDE            0x0101
+#define PCI_CLASS_STORAGE_OTHER          0x0180
+
+#define PCI_CLASS_NETWORK_ETHERNET       0x0200
+
+#define PCI_CLASS_DISPLAY_VGA            0x0300
+#define PCI_CLASS_DISPLAY_OTHER          0x0380
+
+#define PCI_CLASS_MULTIMEDIA_AUDIO       0x0401
+
+#define PCI_CLASS_MEMORY_RAM             0x0500
+
+#define PCI_CLASS_SYSTEM_OTHER           0x0880
+
+#define PCI_CLASS_SERIAL_USB             0x0c03
+
+#define PCI_CLASS_BRIDGE_HOST            0x0600
+#define PCI_CLASS_BRIDGE_ISA             0x0601
+#define PCI_CLASS_BRIDGE_PCI             0x0604
+#define PCI_CLASS_BRIDGE_OTHER           0x0680
+
+#define PCI_CLASS_PROCESSOR_CO           0x0b40
+#define PCI_CLASS_PROCESSOR_POWERPC      0x0b20
+
+#define PCI_CLASS_OTHERS                 0xff
+
 #define PCI_ADDRESS_SPACE_MEM		0x00
 #define PCI_ADDRESS_SPACE_IO		0x01
 #define PCI_ADDRESS_SPACE_MEM_PREFETCH	0x08
@@ -41,6 +75,20 @@ typedef struct PCIIORegion {
 #define PCI_INTERRUPT_PIN	0x3d	/* 8 bits */
 #define PCI_MIN_GNT		0x3e	/* 8 bits */
 #define PCI_MAX_LAT		0x3f	/* 8 bits */
+
+#define PCI_VENDOR_ID_IBM                0x1014
+#define PCI_DEVICE_ID_IBM_OPENPIC2       0xffff
+
+#define PCI_VENDOR_ID_APPLE              0x106b
+#define PCI_DEVICE_ID_APPLE_343S1201     0x0010
+#define PCI_DEVICE_ID_APPLE_UNI_N_I_PCI  0x001e
+#define PCI_DEVICE_ID_APPLE_UNI_N_PCI    0x001f
+#define PCI_DEVICE_ID_APPLE_UNI_N_AGP    0x0020
+#define PCI_DEVICE_ID_APPLE_UNI_N_KEYL   0x0022
+
+#define PCI_VENDOR_ID_MOTOROLA           0x1057
+#define PCI_DEVICE_ID_MOTOROLA_MPC106    0x0002
+#define PCI_DEVICE_ID_MOTOROLA_RAVEN     0x4801
 
 struct PCIDevice {
     /* PCI config space */
