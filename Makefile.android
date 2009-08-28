@@ -757,6 +757,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/acpi.c \
 		   hw/ide.c \
 		   hw/usb-uhci.c \
+		   hw/gt64xxx.c \
 		   hw/i8254.c \
 		   hw/pcnet.c \
 		   hw/serial.c \
