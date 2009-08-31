@@ -122,7 +122,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     char buf[1024];
     qemu_irq *pic, **heathrow_irqs;
     nvram_t nvram;
-//    m48t59_t *m48t59;
+    m48t59_t *m48t59;
     int linux_boot, i;
     ram_addr_t ram_offset, vga_ram_offset, bios_offset, vga_bios_offset;
     uint32_t kernel_base, initrd_base;
@@ -168,24 +168,29 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     cpu_register_physical_memory(0, ram_size, ram_offset);
 
     /* allocate VGA RAM */
-    vga_ram_offset = qemu_ram_alloc(vga_ram_size);
+    vga_ram_offset = ram_size; //qemu_ram_alloc(vga_ram_size);
 
     /* allocate and load BIOS */
-    bios_offset = qemu_ram_alloc(BIOS_SIZE);
+    bios_offset = vga_ram_offset + vga_ram_size; //qemu_ram_alloc(BIOS_SIZE);
     if (bios_name == NULL)
         bios_name = PROM_FILENAME;
     snprintf(buf, sizeof(buf), "%s/%s", bios_dir, bios_name);
-    cpu_register_physical_memory(PROM_ADDR, BIOS_SIZE, bios_offset | IO_MEM_ROM);
+    cpu_register_physical_memory((uint32_t)(-BIOS_SIZE), BIOS_SIZE, bios_offset | IO_MEM_ROM);
 
     /* Load OpenBIOS (ELF) */
-    bios_size = load_elf(buf, 0, NULL, NULL, NULL);
+    {
+        uint64_t offs = 0;
+        bios_size = load_elf(buf, 0, NULL, &offs, NULL);
+	printf("%s:%d: low %llx\n", __func__, __LINE__, offs);
+        memcpy(phys_ram_base, phys_ram_base + bios_offset, 0x1000);
+    }
     if (bios_size < 0 || bios_size > BIOS_SIZE) {
-        cpu_abort(env, "qemu: could not load PowerPC bios '%s'\n", buf);
+        cpu_abort(env, "qemu: could not load PowerPC bios '%s': %d\n",
+                  buf, bios_size);
         exit(1);
     }
-
     /* allocate and load VGA BIOS */
-    vga_bios_offset = qemu_ram_alloc(VGA_BIOS_SIZE);
+    vga_bios_offset = bios_offset + bios_size; //qemu_ram_alloc(VGA_BIOS_SIZE);
     snprintf(buf, sizeof(buf), "%s/%s", bios_dir, VGABIOS_FILENAME);
     vga_bios_size = load_image(buf, phys_ram_base + vga_bios_offset + 8);
     if (vga_bios_size < 0) {
@@ -205,14 +210,16 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     }
 
     if (linux_boot) {
-        uint64_t lowaddr = 0;
+        uint64_t lowaddr = 0LL;
         kernel_base = KERNEL_LOAD_ADDR;
+        printf("%s1: lowaddr %llx, size %d\n", __func__, lowaddr, kernel_size);
         /* Now we can load the kernel. The first step tries to load the kernel
            supposing PhysAddr = 0x00000000. If that was wrong the kernel is
            loaded again, the new PhysAddr being computed from lowaddr. */
-        kernel_size = load_elf(kernel_filename, kernel_base, NULL, &lowaddr, NULL);
+        kernel_size = load_elf(kernel_filename, (int64_t)(kernel_base - 0xc0000000), NULL, &lowaddr, NULL);
+        printf("%s2: lowaddr %llx, size %d\n", __func__, lowaddr, kernel_size);
         if (kernel_size > 0 && lowaddr != KERNEL_LOAD_ADDR) {
-            kernel_size = load_elf(kernel_filename, (2 * kernel_base) - lowaddr,
+            kernel_size = load_elf(kernel_filename, (uint64_t)((2 * kernel_base) - lowaddr),
                                    NULL, 0, NULL);
         }
         if (kernel_size < 0)
@@ -271,10 +278,10 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
         }
     }
 
-    isa_mem_base = 0x80000000;
+//    isa_mem_base = 0x80000000;
 
     /* Register 2 MB of ISA IO space */
-    isa_mmio_init(0xfe000000, 0x00200000);
+//    isa_mmio_init(0xfe000000, 0x00200000);
 
     /* XXX: we register only 1 output pin for heathrow PIC */
     heathrow_irqs = qemu_mallocz(smp_cpus * sizeof(qemu_irq *));
@@ -301,9 +308,12 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     }
     pic = heathrow_pic_init(&pic_mem_index, 1, heathrow_irqs);
     pci_bus = pci_grackle_init(0xfec00000, pic);
-    pci_vga_init(pci_bus, ds, phys_ram_base + vga_ram_offset,
-                 vga_ram_offset, vga_ram_size,
-                 vga_bios_offset, vga_bios_size);
+
+    //silverbox_fb_init(ds, 0xfe000000, pic[12]);
+
+    //pci_vga_init(pci_bus, ds, phys_ram_base + vga_ram_offset,
+    //             vga_ram_offset, vga_ram_size,
+    //            vga_bios_offset, vga_bios_size);
 
     escc_mem_index = escc_init(0x80013000, pic[0x0f], pic[0x10], serial_hds[0],
                                serial_hds[1], ESCC_CLOCK, 4);
@@ -353,8 +363,8 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
 //    adb_kbd_init(&adb_bus);
 //    adb_mouse_init(&adb_bus);
 
-//    nvr = macio_nvram_init(&nvram_mem_index, 0x2000, 4);
-//    pmac_format_nvram_partition(nvr, 0x2000);
+    nvr = macio_nvram_init(&nvram_mem_index, 0x2000, 4);
+    pmac_format_nvram_partition(nvr, 0x2000);
 
     macio_init(pci_bus, PCI_DEVICE_ID_APPLE_343S1201, 1, pic_mem_index,
                dbdma_mem_index, cuda_mem_index, nvr, 2, ide_mem_index,
@@ -367,17 +377,17 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     if (graphic_depth != 15 && graphic_depth != 32 && graphic_depth != 8)
         graphic_depth = 15;
 
-//    m48t59 = m48t59_init(0, 0xFFF04000, 0x0074, NVRAM_SIZE, 59);
-//    nvram.opaque = m48t59;
-//    nvram.read_fn = &m48t59_read;
-//    nvram.write_fn = &m48t59_write;
-//    PPC_NVRAM_set_params(&nvram, NVRAM_SIZE, "HEATHROW", ram_size,
-//                         ppc_boot_device, kernel_base, kernel_size,
-//                         kernel_cmdline,
-//                         initrd_base, initrd_size,
+    m48t59 = m48t59_init(0, 0xFFF04000, 0x0074, NVRAM_SIZE, 59);
+    nvram.opaque = m48t59;
+    nvram.read_fn = &m48t59_read;
+    nvram.write_fn = &m48t59_write;
+    PPC_NVRAM_set_params(&nvram, NVRAM_SIZE, "HEATHROW", ram_size,
+                         ppc_boot_device, kernel_base, kernel_size,
+                         kernel_cmdline,
+                         initrd_base, initrd_size,
                          /* XXX: need an option to load a NVRAM image */
-//                         0,
-//                         graphic_width, graphic_height, graphic_depth);
+                         0,
+                         graphic_width, graphic_height, graphic_depth);
     /* No PCI init: the BIOS will do it */
 
     fw_cfg = fw_cfg_init(0, 0, CFG_ADDR, CFG_ADDR + 2);

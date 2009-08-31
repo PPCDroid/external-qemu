@@ -259,7 +259,7 @@ int old_param = 0;
 #endif
 const char *qemu_name;
 int alt_grab = 0;
-#ifdef TARGET_SPARC
+#if defined (TARGET_SPARC) || defined (TARGET_PPC)
 unsigned int nb_prom_envs = 0;
 const char *prom_envs[MAX_PROM_ENVS];
 #endif
@@ -9277,7 +9277,7 @@ int main(int argc, char **argv)
             case QEMU_OPTION_name:
                 qemu_name = optarg;
                 break;
-#ifdef TARGET_SPARC
+#if defined(TARGET_SPARC) || defined(TARGET_PPC)
             case QEMU_OPTION_prom_env:
                 if (nb_prom_envs >= MAX_PROM_ENVS) {
                     fprintf(stderr, "Too many prom variables\n");

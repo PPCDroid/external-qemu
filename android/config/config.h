@@ -32,6 +32,7 @@
 #define CONFIG_SOFTMMU 1
 #define CONFIG_SOFTFLOAT 1
 #define CONFIG_SDL 1
+#define TARGET_WORDS_BIGENDIAN 1
 #ifndef _WIN32
 #define CONFIG_NAND_LIMITS 1
 #endif
