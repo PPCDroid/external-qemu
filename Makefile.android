@@ -1317,11 +1317,14 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/ide.c \
 		   hw/usb-uhci.c \
 		   hw/i8254.c \
+		   hw/m48t59.c \
+		   hw/mac_nvram.c \
 		   hw/pcnet.c \
 		   hw/serial.c \
 		   hw/parallel.c \
 		   hw/grackle_pci.c \
 		   hw/vga.c \
+		   hw/silverbox_fb.c \
 		   ppc-dis.c \
 		   translate-all.c \
                    trace.c \
