@@ -448,6 +448,7 @@ static inline void tcg_gen_or_i32(TCGv ret, TCGv arg1, TCGv arg2)
 
 static inline void tcg_gen_ori_i32(TCGv ret, TCGv arg1, int32_t arg2)
 {
+    printf("%s: %x %x\n", __func__, arg1, arg2);
     /* some cases can be optimized here */
     if (arg2 == 0xffffffff) {
         tcg_gen_movi_i32(ret, 0xffffffff);
@@ -528,6 +529,7 @@ static inline void tcg_gen_sari_i32(TCGv ret, TCGv arg1, int32_t arg2)
 static inline void tcg_gen_brcond_i32(int cond, TCGv arg1, TCGv arg2, 
                                       int label_index)
 {
+    printf("%s: arg1 %x, arg2 %x, label_index %d\n", __func__, GET_TCGV(arg1), GET_TCGV(arg2));
     tcg_gen_op4ii(INDEX_op_brcond_i32, arg1, arg2, cond, label_index);
 }
 
@@ -1919,6 +1921,7 @@ static inline void tcg_gen_qemu_st64(TCGv arg, TCGv addr, int mem_index)
 #define tcg_gen_ext32u_tl tcg_gen_ext32u_i64
 #define tcg_gen_ext32s_tl tcg_gen_ext32s_i64
 #define tcg_const_tl tcg_const_i64
+#define tcg_const_local_tl tcg_const_local_i64
 #else
 #define TCG_TYPE_TL TCG_TYPE_I32
 #define tcg_gen_movi_tl tcg_gen_movi_i32
@@ -1981,6 +1984,7 @@ static inline void tcg_gen_qemu_st64(TCGv arg, TCGv addr, int mem_index)
 #define tcg_gen_rotr_tl tcg_gen_rotr_i64
 #define tcg_gen_rotri_tl tcg_gen_rotri_i64
 #define tcg_const_tl tcg_const_i32
+#define tcg_const_local_tl tcg_const_local_i32
 #endif
 
 #if TCG_TARGET_REG_BITS == 32
