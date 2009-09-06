@@ -5,7 +5,7 @@
 void register_machines(void)
 {
     qemu_register_machine(&heathrow_machine);
-// XXX    qemu_register_machine(&core99_machine);
+//    qemu_register_machine(&core99_machine);
 // XXX    qemu_register_machine(&prep_machine);
 // XXX    qemu_register_machine(&ref405ep_machine);
 // XXX    qemu_register_machine(&taihu_machine);

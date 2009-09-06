@@ -23,12 +23,6 @@
  * inside "#if defined(TODO) ... #endif" statements to make tests easier.
  */
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <inttypes.h>
-#include "cpu.h"
 #include "dis-asm.h"
 #include "gdbstub.h"
 

@@ -448,7 +448,6 @@ static inline void tcg_gen_or_i32(TCGv ret, TCGv arg1, TCGv arg2)
 
 static inline void tcg_gen_ori_i32(TCGv ret, TCGv arg1, int32_t arg2)
 {
-    printf("%s: %x %x\n", __func__, arg1, arg2);
     /* some cases can be optimized here */
     if (arg2 == 0xffffffff) {
         tcg_gen_movi_i32(ret, 0xffffffff);
@@ -529,7 +528,6 @@ static inline void tcg_gen_sari_i32(TCGv ret, TCGv arg1, int32_t arg2)
 static inline void tcg_gen_brcond_i32(int cond, TCGv arg1, TCGv arg2, 
                                       int label_index)
 {
-    printf("%s: arg1 %x, arg2 %x, label_index %d\n", __func__, GET_TCGV(arg1), GET_TCGV(arg2));
     tcg_gen_op4ii(INDEX_op_brcond_i32, arg1, arg2, cond, label_index);
 }
 

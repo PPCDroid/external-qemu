@@ -50,8 +50,7 @@
 #ifdef PPC_DEBUG_DISAS
 #  define LOG_DISAS(...) qemu_log_mask(CPU_LOG_TB_IN_ASM, ## __VA_ARGS__)
 #else
-#  define LOG_DISAS	printf
-//do { } while (0)
+#  define LOG_DISAS(...) do { } while (0)
 #endif
 /*****************************************************************************/
 /* Code translation helpers                                                  */
@@ -712,7 +711,7 @@ static always_inline void gen_op_cmp(TCGv arg0, TCGv arg1, int s, int crf)
 {
     int l1, l2, l3;
 
-    printf("%s: cpu_crf[%d] 0x%x\n", __func__, crf, cpu_crf[crf]);
+//    printf("%s: cpu_crf[%d] 0x%x\n", __func__, crf, cpu_crf[crf]);
     tcg_gen_trunc_tl_i32(cpu_crf[crf], cpu_xer);
     tcg_gen_shri_i32(cpu_crf[crf], cpu_crf[crf], XER_SO);
     tcg_gen_andi_i32(cpu_crf[crf], cpu_crf[crf], 1);
@@ -739,7 +738,7 @@ static always_inline void gen_op_cmp(TCGv arg0, TCGv arg1, int s, int crf)
 
 static always_inline void gen_op_cmpi(TCGv arg0, target_ulong arg1, int s, int crf)
 {
-    printf("%s: arg1 %d s %d crf %d\n", __func__, arg1, s, crf);
+//    printf("%s: arg1 %d s %d crf %d\n", __func__, arg1, s, crf);
     TCGv t0 = tcg_const_local_tl(arg1);
     gen_op_cmp(arg0, t0, s, crf);
     tcg_temp_free(t0);
@@ -3513,20 +3512,20 @@ static always_inline void gen_goto_tb (DisasContext *ctx, int n,
     TranslationBlock *tb;
     tb = ctx->tb;
 
-    printf("%s: n %x dest 0x%lx\n", __func__, n, dest);
+//    printf("%s: n %x dest 0x%lx\n", __func__, n, dest);
 #if defined(TARGET_PPC64)
     if (!ctx->sf_mode)
         dest = (uint32_t) dest;
 #endif
     if ((tb->pc & TARGET_PAGE_MASK) == (dest & TARGET_PAGE_MASK) &&
         likely(!ctx->singlestep_enabled)) {
-        printf("here 1\n");
+//        printf("here 1\n");
         tcg_gen_goto_tb(n);
         tcg_gen_movi_tl(cpu_nip, dest & ~3);
         tcg_gen_exit_tb((long)tb + n);
     } else {
         tcg_gen_movi_tl(cpu_nip, dest & ~3);
-        printf("here 2\n");
+//        printf("here 2\n");
         if (unlikely(ctx->singlestep_enabled)) {
             if ((ctx->singlestep_enabled &
                 (CPU_BRANCH_STEP | CPU_SINGLE_STEP)) &&
@@ -3559,7 +3558,7 @@ GEN_HANDLER(b, 0x12, 0xFF, 0xFF, 0x00000000, PPC_FLOW)
 {
     target_ulong li, target;
 
-    printf("%s: entered\n", __func__);
+//    printf("%s: entered\n", __func__);
     ctx->exception = POWERPC_EXCP_BRANCH;
     /* sign extend LI */
 #if defined(TARGET_PPC64)
@@ -3569,14 +3568,14 @@ GEN_HANDLER(b, 0x12, 0xFF, 0xFF, 0x00000000, PPC_FLOW)
 #endif
         li = ((int32_t)LI(ctx->opcode) << 6) >> 6;
     if (likely(AA(ctx->opcode) == 0)) {
-        printf("a\n");
+//        printf("a\n");
         target = ctx->nip + li - 4;
     } else {
-        printf("b\n");
+//        printf("b\n");
         target = li;
     }
     if (LK(ctx->opcode)) {
-        printf("c\n");
+//        printf("c\n");
         gen_setlr(ctx, ctx->nip);
     }
     gen_goto_tb(ctx, 0, target);
@@ -3593,7 +3592,7 @@ static always_inline void gen_bcond (DisasContext *ctx, int type)
     TCGv target;
 
     ctx->exception = POWERPC_EXCP_BRANCH;
-    printf("%s: type %d\n", __func__, type);
+//    printf("%s: type %d\n", __func__, type);
     if (type == BCOND_LR || type == BCOND_CTR) {
         target = tcg_temp_local_new(TCG_TYPE_I32);
         if (type == BCOND_CTR)
@@ -3631,13 +3630,13 @@ static always_inline void gen_bcond (DisasContext *ctx, int type)
         uint32_t mask = 1 << (3 - (bi & 0x03));
         TCGv_i32 temp = tcg_temp_new_i32();
 
-        printf("%s: bi %x crf %x mask %x !(bo & 0x10)\n", __func__, bi, cpu_crf[bi >> 2], mask);
+//        printf("%s: bi %x crf %x mask %x !(bo & 0x10)\n", __func__, bi, cpu_crf[bi >> 2], mask);
         if (bo & 0x8) {
-            printf("8\n");
+//            printf("8\n");
             tcg_gen_andi_i32(temp, cpu_crf[bi >> 2], mask);
             tcg_gen_brcondi_i32(TCG_COND_EQ, temp, 0, l1);
         } else {
-            printf("!8\n");
+//            printf("!8\n");
             tcg_gen_andi_i32(temp, cpu_crf[bi >> 2], mask);
             tcg_gen_brcondi_i32(TCG_COND_NE, temp, 0, l1);
         }
@@ -3645,12 +3644,12 @@ static always_inline void gen_bcond (DisasContext *ctx, int type)
     }
     if (type == BCOND_IM) {
         target_ulong li = (target_long)((int16_t)(BD(ctx->opcode)));
-        printf("%s: nip %x li %x\n", __func__, ctx->nip, li);
+//        printf("%s: nip %x li %x\n", __func__, ctx->nip, li);
         if (likely(AA(ctx->opcode) == 0)) {
-            printf("varinat 1\n");
+//            printf("varinat 1\n");
             gen_goto_tb(ctx, 0, ctx->nip + li - 4);
         } else {
-            printf("varinat 2\n");
+//            printf("varinat 2\n");
             gen_goto_tb(ctx, 0, li);
         }
         gen_set_label(l1);
@@ -8298,8 +8297,8 @@ static always_inline void gen_intermediate_code_internal (CPUState *env,
                     ctx.opcode, opc1(ctx.opcode), opc2(ctx.opcode),
                     opc3(ctx.opcode), ctx.le_mode ? "little" : "big");
 
-       cpu_dump_state (env, stdout, fprintf, 0);
-       printf("cpu_gpr[5] %x\n", GET_TCGV(cpu_gpr[5]));
+//       cpu_dump_state (env, stderr, fprintf, 0);
+//       printf("cpu_gpr[5] %x\n", GET_TCGV(cpu_gpr[5]));
 //        if (ctx.nip == 0xfff08450)
 //            cpu_abort(env, "dummy abort\n");
 
@@ -8307,15 +8306,15 @@ static always_inline void gen_intermediate_code_internal (CPUState *env,
         table = env->opcodes;
         num_insns++;
         handler = table[opc1(ctx.opcode)];
-        printf("handler %p\n", handler);
+//        printf("handler %p\n", handler);
         if (is_indirect_opcode(handler)) {
             table = ind_table(handler);
             handler = table[opc2(ctx.opcode)];
-            printf("indirect1, next handler %p\n", handler);
+//            printf("indirect1, next handler %p\n", handler);
             if (is_indirect_opcode(handler)) {
                 table = ind_table(handler);
                 handler = table[opc3(ctx.opcode)];
-                printf("indirect2, next handler %p\n", handler);
+//                printf("indirect2, next handler %p\n", handler);
             }
         }
         /* Is opcode *REALLY* valid ? */
@@ -8395,16 +8394,17 @@ static always_inline void gen_intermediate_code_internal (CPUState *env,
         tb->size = ctx.nip - pc_start;
         tb->icount = num_insns;
     }
-#if 1//defined(DEBUG_DISAS)
+#if defined(DEBUG_DISAS)
     printf("---------------- excp: %04x\n", ctx.exception);
     log_cpu_state_mask(CPU_LOG_TB_CPU, env, 0);
     if (1 || qemu_loglevel_mask(CPU_LOG_TB_IN_ASM)) {
         int flags;
         flags = env->bfd_mach;
         flags |= ctx.le_mode << 16;
-        printf("IN: %s\n", lookup_symbol(pc_start));
-        printf("pc_start %x, ctx.nip - pc_start %x, flags %x\n", pc_start, ctx.nip - pc_start, flags);
-        printf("\n");
+        fprintf(stderr, "IN: %s\n", lookup_symbol(pc_start));
+        fprintf(stderr, "pc_start %x, ctx.nip - pc_start %x, flags %x\n", pc_start, ctx.nip - pc_start, flags);
+        fprintf(stderr, "\n");
+        fprintf(stderr, "\n");
     }
 #endif
 }

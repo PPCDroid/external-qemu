@@ -1311,6 +1311,8 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/fw_cfg.c \
 		   hw/mac_dbdma.c \
 		   hw/macio.c \
+		   hw/cuda.c \
+		   hw/adb.c \
 		   hw/isa_mmio.c \
 		   hw/irq.c \
 		   hw/acpi.c \

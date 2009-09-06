@@ -178,12 +178,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     cpu_register_physical_memory((uint32_t)(-BIOS_SIZE), BIOS_SIZE, bios_offset | IO_MEM_ROM);
 
     /* Load OpenBIOS (ELF) */
-    {
-        uint64_t offs = 0;
-        bios_size = load_elf(buf, 0, NULL, &offs, NULL);
-	printf("%s:%d: low %llx\n", __func__, __LINE__, offs);
-        memcpy(phys_ram_base, phys_ram_base + bios_offset, 0x1000);
-    }
+    bios_size = load_elf(buf, 0LL, NULL, NULL, NULL);
     if (bios_size < 0 || bios_size > BIOS_SIZE) {
         cpu_abort(env, "qemu: could not load PowerPC bios '%s': %d\n",
                   buf, bios_size);
@@ -220,7 +215,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
         printf("%s2: lowaddr %llx, size %d\n", __func__, lowaddr, kernel_size);
         if (kernel_size > 0 && lowaddr != KERNEL_LOAD_ADDR) {
             kernel_size = load_elf(kernel_filename, (uint64_t)((2 * kernel_base) - lowaddr),
-                                   NULL, 0, NULL);
+                                   NULL, 0LL, NULL);
         }
         if (kernel_size < 0)
             kernel_size = load_aout(kernel_filename, kernel_base,
@@ -278,10 +273,10 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
         }
     }
 
-//    isa_mem_base = 0x80000000;
+    isa_mem_base = 0x80000000;
 
     /* Register 2 MB of ISA IO space */
-//    isa_mmio_init(0xfe000000, 0x00200000);
+    isa_mmio_init(0xfe000000, 0x00200000);
 
     /* XXX: we register only 1 output pin for heathrow PIC */
     heathrow_irqs = qemu_mallocz(smp_cpus * sizeof(qemu_irq *));
@@ -309,11 +304,11 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     pic = heathrow_pic_init(&pic_mem_index, 1, heathrow_irqs);
     pci_bus = pci_grackle_init(0xfec00000, pic);
 
-    //silverbox_fb_init(ds, 0xfe000000, pic[12]);
+    silverbox_fb_init(ds, 0xfe200000, pic[12]);
 
-    //pci_vga_init(pci_bus, ds, phys_ram_base + vga_ram_offset,
-    //             vga_ram_offset, vga_ram_size,
-    //            vga_bios_offset, vga_bios_size);
+    pci_vga_init(pci_bus, ds, phys_ram_base + vga_ram_offset,
+                 vga_ram_offset, vga_ram_size,
+                vga_bios_offset, vga_bios_size);
 
     escc_mem_index = escc_init(0x80013000, pic[0x0f], pic[0x10], serial_hds[0],
                                serial_hds[1], ESCC_CLOCK, 4);
@@ -358,9 +353,9 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     ide_mem_index[1] = pmac_ide_init(hd, pic[0x0D], dbdma, 0x16, pic[0x02]);
 
     /* cuda also initialize ADB */
-//    cuda_init(&cuda_mem_index, pic[0x12]);
+    cuda_init(&cuda_mem_index, pic[0x12]);
 
-//    adb_kbd_init(&adb_bus);
+    adb_kbd_init(&adb_bus);
 //    adb_mouse_init(&adb_bus);
 
     nvr = macio_nvram_init(&nvram_mem_index, 0x2000, 4);
