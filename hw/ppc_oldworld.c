@@ -168,10 +168,10 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     cpu_register_physical_memory(0, ram_size, ram_offset);
 
     /* allocate VGA RAM */
-    vga_ram_offset = ram_size; //qemu_ram_alloc(vga_ram_size);
+    vga_ram_offset = qemu_ram_alloc(vga_ram_size);
 
     /* allocate and load BIOS */
-    bios_offset = vga_ram_offset + vga_ram_size; //qemu_ram_alloc(BIOS_SIZE);
+    bios_offset = qemu_ram_alloc(BIOS_SIZE);
     if (bios_name == NULL)
         bios_name = PROM_FILENAME;
     snprintf(buf, sizeof(buf), "%s/%s", bios_dir, bios_name);
@@ -185,7 +185,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
         exit(1);
     }
     /* allocate and load VGA BIOS */
-    vga_bios_offset = bios_offset + bios_size; //qemu_ram_alloc(VGA_BIOS_SIZE);
+    vga_bios_offset = qemu_ram_alloc(VGA_BIOS_SIZE);
     snprintf(buf, sizeof(buf), "%s/%s", bios_dir, VGABIOS_FILENAME);
     vga_bios_size = load_image(buf, phys_ram_base + vga_bios_offset + 8);
     if (vga_bios_size < 0) {
@@ -304,7 +304,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     pic = heathrow_pic_init(&pic_mem_index, 1, heathrow_irqs);
     pci_bus = pci_grackle_init(0xfec00000, pic);
 
-    silverbox_fb_init(ds, 0xfe200000, pic[12]);
+    silverbox_fb_init(ds, 0xfe200000, pic[0x0C]);
 
     pci_vga_init(pci_bus, ds, phys_ram_base + vga_ram_offset,
                  vga_ram_offset, vga_ram_size,

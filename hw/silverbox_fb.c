@@ -200,7 +200,7 @@ static void silverbox_fb_update_display(void *opaque)
             for (nn = 0; nn < width; nn++) {
                 unsigned   spix = src[nn];
                 unsigned   dpix = dst[nn];
-#if WORDS_BIGENDIAN
+#if TARGET_WORDS_BIGENDIAN
                 spix = ((spix << 8) | (spix >> 8)) & 0xffff;
 #else
                 if (spix != dpix)
@@ -213,7 +213,7 @@ static void silverbox_fb_update_display(void *opaque)
             if (n > nn)
                 n = nn;
 
-#if WORDS_BIGENDIAN
+#if TARGET_WORDS_BIGENDIAN
             for ( ; nn < width; nn++ ) {
                 unsigned   spix = src[nn];
                 dst[nn] = (uint16_t)((spix << 8) | (spix >> 8));
@@ -236,7 +236,7 @@ static void silverbox_fb_update_display(void *opaque)
             uint16_t*  src   = (uint16_t*) src_line;
             uint16_t*  dst   = (uint16_t*) dst_line;
             int        len   = width*2;
-#if WORDS_BIGENDIAN
+#if TARGET_WORDS_BIGENDIAN
             int        nn;
 #endif
             int        dirty = 0;
@@ -255,7 +255,7 @@ static void silverbox_fb_update_display(void *opaque)
             if (!dirty)
                 continue;
 
-#if WORDS_BIGENDIAN
+#if TARGET_WORDS_BIGENDIAN
             for (nn = 0; nn < width; nn++ ) {
                 unsigned   spix = src[nn];
                 dst[nn] = (uint16_t)((spix << 8) | (spix >> 8));
@@ -295,6 +295,13 @@ static void  silverbox_fb_detach_display(void*  opaque)
     s->qfbuff = NULL;
 }
 
+static uint32_t change_endianness(uint32_t val)
+{
+    uint8_t *p = (uint8_t *)&val;
+    val = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
+    return val;
+}
+
 static uint32_t silverbox_fb_read(void *opaque, target_phys_addr_t offset)
 {
     uint32_t ret;
@@ -303,13 +310,13 @@ static uint32_t silverbox_fb_read(void *opaque, target_phys_addr_t offset)
     switch(offset) {
         case FB_GET_WIDTH:
             ret = s->qfbuff->width;
-            //printf("FB_GET_WIDTH => %d\n", ret);
-            return ret;
+            printf("FB_GET_WIDTH => %d\n", ret);
+            break;
 
         case FB_GET_HEIGHT:
             ret = s->qfbuff->height;
-            //printf( "FB_GET_HEIGHT = %d\n", ret);
-            return ret;
+            printf( "FB_GET_HEIGHT = %d\n", ret);
+            break;
 
         case FB_INT_STATUS:
             ret = s->int_status & s->int_enable;
@@ -317,22 +324,26 @@ static uint32_t silverbox_fb_read(void *opaque, target_phys_addr_t offset)
                 s->int_status &= ~ret;
                 qemu_set_irq(s->irq, 0);
             }
-            return ret;
+            break;
 
         case FB_GET_PHYS_WIDTH:
             ret = s->qfbuff->phys_width_mm;
             //printf( "FB_GET_PHYS_WIDTH => %d\n", ret );
-            return ret;
+            break;
 
         case FB_GET_PHYS_HEIGHT:
             ret = s->qfbuff->phys_height_mm;
             //printf( "FB_GET_PHYS_HEIGHT => %d\n", ret );
-            return ret;
+            break;
 
         default:
             cpu_abort (cpu_single_env, "silverbox_fb_read: Bad offset %x\n", offset);
             return 0;
     }
+#ifdef TARGET_WORDS_BIGENDIAN
+   ret = change_endianness(ret);
+#endif
+    return ret;
 }
 
 static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
@@ -343,11 +354,18 @@ static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
     switch(offset) {
         case FB_INT_ENABLE:
             s->int_enable = val;
+#ifdef TARGET_WORDS_BIGENDIAN
+            s->int_enable = change_endianness(s->int_enable);
+#endif
             qemu_set_irq(s->irq, (s->int_status & s->int_enable));
             break;
         case FB_SET_BASE: {
             int need_resize = !s->base_valid;
             s->fb_base = val;
+#ifdef TARGET_WORDS_BIGENDIAN
+            s->fb_base = change_endianness(s->fb_base);
+            printf("%s: set base to 0x%x\n", __func__, s->fb_base);
+#endif
             s->int_status &= ~FB_INT_BASE_UPDATE_DONE;
             s->need_update = 1;
             s->need_int = 1;
@@ -365,10 +383,14 @@ static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
             } break;
         case FB_SET_ROTATION:
             //printf( "FB_SET_ROTATION %d\n", val);
-            s->set_rotation = val;
+#ifdef TARGET_WORDS_BIGENDIAN
+            s->set_rotation = change_endianness(s->set_rotation);
+#endif
             break;
         case FB_SET_BLANK:
-            s->blank = val;
+#ifdef TARGET_WORDS_BIGENDIAN
+            s->blank = change_endianness(s->blank);
+#endif
             s->need_update = 1;
             break;
         default:
