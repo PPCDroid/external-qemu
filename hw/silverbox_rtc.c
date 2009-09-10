@@ -44,23 +44,36 @@ static void silverbox_rtc_tm(void *opaque)
 static uint32_t silverbox_rtc_read(void *opaque, target_phys_addr_t offset)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
+    uint32_t ret = 0;
+
     offset -= s->base;
     switch(offset) {
         case 0x0:
             s->now = (int64_t)time(NULL) * 1000000000;
-            return s->now;
+            ret = s->now;
+            goto out;
         case 0x4:
-            return s->now >> 32;
+            ret = s->now >> 32;
+            goto out;
         default:
             cpu_abort (cpu_single_env, "silverbox_rtc_read: Bad offset %x\n", offset);
-            return 0;
     }
+out:
+#ifdef TARGET_WORDS_BIGENDIAN
+    ret = change_endianness(ret);
+#endif
+    return ret;
 }
 
 static void silverbox_rtc_write(void *opaque, target_phys_addr_t offset, uint32_t value)
 {
     struct rtc_state *s = (struct rtc_state *)opaque;
     int64_t alarm;
+
+#ifdef TARGET_WORDS_BIGENDIAN
+    value = change_endianness(value);
+#endif
+
     offset -= s->base;
     switch(offset) {
         case 0x8:
