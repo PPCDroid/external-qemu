@@ -374,35 +374,46 @@ static void silverbox_mmc_do_command(struct silverbox_mmc_state *s, uint32_t cmd
 
 static uint32_t silverbox_mmc_read(void *opaque, target_phys_addr_t offset)
 {
-    uint32_t ret;
+    uint32_t ret = 0;
     struct silverbox_mmc_state *s = opaque;
 
     offset -= s->base;
     switch(offset) {
         case MMC_INT_STATUS:
             // return current buffer status flags
-            return s->int_status & s->int_enable;
+            ret = s->int_status & s->int_enable;
+            goto out;
         case MMC_RESP_0:
-            return s->resp[0];
+            ret = s->resp[0];
+            goto out;
         case MMC_RESP_1:
-            return s->resp[1];
+            ret = s->resp[1];
+            goto out;
         case MMC_RESP_2:
-            return s->resp[2];
+            ret = s->resp[2];
+            goto out;
         case MMC_RESP_3:
-            return s->resp[3];
+            ret = s->resp[3];
+            goto out;
         case MMC_STATE: {
 	    if (s->bs == NULL)
-		return 0;	/* not inserted, not read_only */
-            ret = MMC_STATE_INSERTED;
-            if (bdrv_is_read_only(s->bs)) {
-                ret |= MMC_STATE_READ_ONLY;
+		ret = 0;	/* not inserted, not read_only */
+            else {
+                ret = MMC_STATE_INSERTED;
+                if (bdrv_is_read_only(s->bs)) {
+                    ret |= MMC_STATE_READ_ONLY;
+                }
             }
-            return ret;
+            goto out;
         }
         default:
             cpu_abort(cpu_single_env, "silverbox_mmc_read: Bad offset %x\n", offset);
-            return 0;
     }
+out:
+#ifdef TARGET_WORDS_BIGENDIAN
+    ret = change_endianness(ret);
+#endif
+    return ret;
 }
 
 static void silverbox_mmc_write(void *opaque, target_phys_addr_t offset, uint32_t val)
@@ -411,6 +422,10 @@ static void silverbox_mmc_write(void *opaque, target_phys_addr_t offset, uint32_
     int status, old_status;
 
     offset -= s->base;
+
+#ifdef TARGET_WORDS_BIGENDIAN
+    val = change_endianness(val);
+#endif
 
     switch(offset) {
 
