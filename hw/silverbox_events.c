@@ -127,7 +127,6 @@ static unsigned dequeue_event(events_state *s)
 
     s->first = (s->first + 1) & (MAX_EVENTS - 1);
 
-    /* XXX: revisit */
     qemu_irq_lower(s->irq);
     if(s->first != s->last) {
         qemu_irq_raise(s->irq);

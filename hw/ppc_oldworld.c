@@ -305,6 +305,13 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     pci_bus = pci_grackle_init(0xfec00000, pic);
 
     silverbox_fb_init(ds, 0xfe200000, pic[0x0C]);
+    index = drive_get_index( IF_IDE, 0, 0);
+    silverbox_mmc_init(0xfe200800, pic[5], 0, index >= 0 ? drives_table[index].bdrv : NULL);
+    events_dev_init(0xfe201400, pic[7]);
+    silverbox_rtc_init(0xfec01000);
+#ifdef CONFIG_NAND
+    nand_dev_init(0xfe200c00);
+#endif
 
     pci_vga_init(pci_bus, ds, phys_ram_base + vga_ram_offset,
                  vga_ram_offset, vga_ram_size,

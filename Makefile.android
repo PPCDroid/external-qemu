@@ -1327,6 +1327,10 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/grackle_pci.c \
 		   hw/vga.c \
 		   hw/silverbox_fb.c \
+		   hw/silverbox_mmc.c \
+		   hw/silverbox_rtc.c \
+		   hw/silverbox_nand.c \
+		   hw/silverbox_events.c \
 		   ppc-dis.c \
 		   translate-all.c \
                    trace.c \

@@ -236,7 +236,7 @@ static void silverbox_tty_write(void *opaque, target_phys_addr_t offset, uint32_
             break;
 
         default:
-            cpu_abort (cpu_single_env, "silverbox_tty_write: Bad offset %x\n", offset);
+            cpu_abort (cpu_single_env, "%s: Bad offset %x\n", __func__, offset);
     }
 }
 

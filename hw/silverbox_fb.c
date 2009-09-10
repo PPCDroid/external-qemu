@@ -295,13 +295,6 @@ static void  silverbox_fb_detach_display(void*  opaque)
     s->qfbuff = NULL;
 }
 
-static uint32_t change_endianness(uint32_t val)
-{
-    uint8_t *p = (uint8_t *)&val;
-    val = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-    return val;
-}
-
 static uint32_t silverbox_fb_read(void *opaque, target_phys_addr_t offset)
 {
     uint32_t ret;

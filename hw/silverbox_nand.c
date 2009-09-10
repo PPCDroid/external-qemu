@@ -324,6 +324,10 @@ static void nand_dev_write(void *opaque, target_phys_addr_t offset, uint32_t val
 {
     nand_dev_state *s = (nand_dev_state *)opaque;
 
+#ifdef TARGET_WORDS_BIGENDIAN
+    value = change_endianness(value);
+#endif
+
     offset -= s->base;
     switch (offset) {
     case NAND_DEV:
@@ -358,48 +362,64 @@ static uint32_t nand_dev_read(void *opaque, target_phys_addr_t offset)
 {
     nand_dev_state *s = (nand_dev_state *)opaque;
     nand_dev *dev;
+    uint32_t ret = 0;
 
     offset -= s->base;
     switch (offset) {
     case NAND_VERSION:
-        return NAND_VERSION_CURRENT;
+        ret = NAND_VERSION_CURRENT;
+        goto out;
     case NAND_NUM_DEV:
-        return nand_dev_count;
+        ret = nand_dev_count;
+        goto out;
     case NAND_RESULT:
-        return s->result;
+        ret = s->result;
+        goto out;
     }
 
     if(s->dev >= nand_dev_count)
-        return 0;
+        ret = 0;
 
     dev = nand_devs + s->dev;
 
     switch (offset) {
     case NAND_DEV_FLAGS:
-        return dev->flags;
+        ret = dev->flags;
+        goto out;
 
     case NAND_DEV_NAME_LEN:
-        return dev->devname_len;
+        ret = dev->devname_len;
+        goto out;
 
     case NAND_DEV_PAGE_SIZE:
-        return dev->page_size;
+        ret = dev->page_size;
+        goto out;
 
     case NAND_DEV_EXTRA_SIZE:
-        return dev->extra_size;
+        ret = dev->extra_size;
+        goto out;
 
     case NAND_DEV_ERASE_SIZE:
-        return dev->erase_size;
+        ret = dev->erase_size;
+        goto out;
 
     case NAND_DEV_SIZE_LOW:
-        return (uint32_t)dev->size;
+        ret = (uint32_t)dev->size;
+        goto out;
 
     case NAND_DEV_SIZE_HIGH:
-        return (uint32_t)(dev->size >> 32);
+        ret = (uint32_t)(dev->size >> 32);
+        goto out;
 
     default:
         cpu_abort(cpu_single_env, "nand_dev_read: Bad offset %x\n", offset);
-        return 0;
     }
+
+out:
+#ifdef TARGET_WORDS_BIGENDIAN
+    ret = change_endianness(ret);
+#endif
+    return ret;
 }
 
 static CPUReadMemoryFunc *nand_dev_readfn[] = {
