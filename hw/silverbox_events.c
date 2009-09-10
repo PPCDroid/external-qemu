@@ -166,13 +166,19 @@ static uint32_t events_read(void *x, target_phys_addr_t off)
 {
     events_state *s = (events_state *) x;
     int offset = off - s->base;
+    uint32_t ret = 0;
+
     if (offset == REG_READ)
-        return dequeue_event(s);
+        ret = dequeue_event(s);
     else if (offset == REG_LEN)
-        return get_page_len(s);
+        ret = get_page_len(s);
     else if (offset >= REG_DATA)
-        return get_page_data(s, offset - REG_DATA);
-    return 0; // this shouldn't happen, if the driver does the right thing
+        ret = get_page_data(s, offset - REG_DATA);
+
+#ifdef TARGET_WORDS_BIGENDIAN
+    ret = change_endianness(ret);
+#endif
+   return ret;
 }
 
 static void events_write(void *x, target_phys_addr_t off, uint32_t val)
@@ -180,7 +186,11 @@ static void events_write(void *x, target_phys_addr_t off, uint32_t val)
     events_state *s = (events_state *) x;
     int offset = off - s->base;
     if (offset == REG_SET_PAGE)
+#ifdef TARGET_WORDS_BIGENDIAN
+        s->page = change_endianness(val);
+#else
         s->page = val;
+#endif
 }
 
 static CPUReadMemoryFunc *events_readfn[] = {
