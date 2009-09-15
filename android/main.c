@@ -1745,7 +1745,7 @@ int main(int argc, char **argv)
 #elif defined (TARGET_MIPS)
     unsigned  defaultPartitionSize = 0x14a00000;
 #elif defined (TARGET_PPC)
-    unsigned  defaultPartitionSize = 0x12900000;
+    unsigned  defaultPartitionSize = 0x8400000;
 #else
 #error Unknown architecture
 #endif
