@@ -1963,6 +1963,7 @@ int main(int argc, char **argv)
             D("autoconfig: -kernel %s", opts->kernel);
         }
 
+
         if (!opts->ramdisk) {
             opts->ramdisk = _getSdkSystemImage(opts->sysdir, "-ramdisk", "ramdisk.img");
             D("autoconfig: -ramdisk %s", opts->ramdisk);
@@ -2464,6 +2465,16 @@ int main(int argc, char **argv)
             }
         }
     }
+
+#ifdef TARGET_PPC
+    {
+        char *path = _getSdkImagePath("kernel-qemu");
+        if (path) {
+            args[n++] = "-L";
+            args[n++] = strdup(path);
+        }
+    }
+#endif
 
     if (opts->memory) {
         char*  end;

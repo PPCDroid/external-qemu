@@ -710,7 +710,8 @@ HW_SOURCES := irq.c \
 	      silverbox_rtc.c \
 	      silverbox_nand.c \
 	      silverbox_events.c \
-	      silverbox_mmc.c
+	      silverbox_mmc.c \
+	      silverbox_tty.c
 	      
 
 LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
@@ -752,7 +753,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/isa_mmio.c			\
 		   hw/mips_int.c \
 		   hw/mips_timer.c \
-		   hw/silverbox.c \
+		   hw/silverbox_mips.c \
 		   hw/irq.c \
 		   hw/acpi.c \
 		   hw/ide.c \
@@ -1032,7 +1033,7 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/utils/timezone.c \
               android/avd/hw-config.c \
               android/avd/info.c \
-	      hw/silverbox.c
+	      hw/silverbox_mips.c
 
 VL_SOURCES += hw/es1370.c
 
@@ -1264,7 +1265,8 @@ HW_SOURCES := irq.c \
 	      silverbox_rtc.c \
 	      silverbox_nand.c \
 	      silverbox_events.c \
-	      silverbox_mmc.c
+	      silverbox_mmc.c \
+	      silverbox_tty.c
 	      
 
 LOCAL_SRC_FILES += $(HW_SOURCES:%=hw/%)
@@ -1301,7 +1303,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   target-ppc/machine.c \
 		   target-ppc/op_helper.c \
 		   target-ppc/translate.c \
-		   hw/ppc_oldworld.c \
+		   hw/silverbox_ppc.c \
 		   hw/ppc.c \
 		   hw/ppc405_uc.c \
 		   hw/ppc4xx_devs.c \
@@ -1331,6 +1333,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/silverbox_rtc.c \
 		   hw/silverbox_nand.c \
 		   hw/silverbox_events.c \
+		   hw/silverbox_tty.c \
 		   ppc-dis.c \
 		   translate-all.c \
                    trace.c \

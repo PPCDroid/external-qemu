@@ -41,6 +41,7 @@
 #define CFG_ADDR 0xf0000510
 
 char *audio_input_source;
+extern int silverbox_tty_add(CharDriverState *cs, int id, uint32_t base, qemu_irq irq);
 
 /* temporary frame buffer OSI calls for the video.x driver. The right
    solution is to modify the driver to use VGA PCI I/Os */
@@ -184,35 +185,16 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
                   buf, bios_size);
         exit(1);
     }
-    /* allocate and load VGA BIOS */
-    vga_bios_offset = qemu_ram_alloc(VGA_BIOS_SIZE);
-    snprintf(buf, sizeof(buf), "%s/%s", bios_dir, VGABIOS_FILENAME);
-    vga_bios_size = load_image(buf, phys_ram_base + vga_bios_offset + 8);
-    if (vga_bios_size < 0) {
-        /* if no bios is present, we can still work */
-        fprintf(stderr, "qemu: warning: could not load VGA bios '%s'\n", buf);
-        vga_bios_size = 0;
-    } else {
-        /* set a specific header (XXX: find real Apple format for NDRV
-           drivers) */
-        phys_ram_base[vga_bios_offset] = 'N';
-        phys_ram_base[vga_bios_offset + 1] = 'D';
-        phys_ram_base[vga_bios_offset + 2] = 'R';
-        phys_ram_base[vga_bios_offset + 3] = 'V';
-        cpu_to_be32w((uint32_t *)(phys_ram_base + vga_bios_offset + 4),
-                     vga_bios_size);
-        vga_bios_size += 8;
-    }
+    /* allocate and load VGA BIOS -- no need to for us */
+    vga_bios_size = 0;
 
     if (linux_boot) {
         uint64_t lowaddr = 0LL;
         kernel_base = KERNEL_LOAD_ADDR;
-        printf("%s1: lowaddr %llx, size %d\n", __func__, lowaddr, kernel_size);
         /* Now we can load the kernel. The first step tries to load the kernel
            supposing PhysAddr = 0x00000000. If that was wrong the kernel is
            loaded again, the new PhysAddr being computed from lowaddr. */
         kernel_size = load_elf(kernel_filename, (int64_t)(kernel_base - 0xc0000000), NULL, &lowaddr, NULL);
-        printf("%s2: lowaddr %llx, size %d\n", __func__, lowaddr, kernel_size);
         if (kernel_size > 0 && lowaddr != KERNEL_LOAD_ADDR) {
             kernel_size = load_elf(kernel_filename, (uint64_t)((2 * kernel_base) - lowaddr),
                                    NULL, 0LL, NULL);
@@ -308,7 +290,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     index = drive_get_index( IF_IDE, 0, 0);
     silverbox_mmc_init(0xfe200800, pic[5], 0, index >= 0 ? drives_table[index].bdrv : NULL);
     events_dev_init(0xfe201400, pic[7]);
-    silverbox_rtc_init(0xfec01000);
+    silverbox_rtc_init(0xfe201000);
 #ifdef CONFIG_NAND
     nand_dev_init(0xfe200c00);
 #endif
@@ -320,8 +302,13 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     escc_mem_index = escc_init(0x80013000, pic[0x0f], pic[0x10], serial_hds[0],
                                serial_hds[1], ESCC_CLOCK, 4);
 
-    for(i = 0; i < nb_nics; i++)
-        pci_nic_init(pci_bus, &nd_table[i], -1); // XXX "ne2k_pci");
+    silverbox_tty_add(serial_hds[2], 2, 0xfe201400, pic[9]);
+
+    for(i = 0; i < nb_nics; i++) {
+        if (!nd_table[i].model)
+            nd_table[i].model = "ne2k_pci";
+        pci_nic_init(pci_bus, &nd_table[i], -1);
+    }
 
     /* First IDE channel is a CMD646 on the PCI bus */
 
