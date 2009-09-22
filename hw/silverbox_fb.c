@@ -303,12 +303,12 @@ static uint32_t silverbox_fb_read(void *opaque, target_phys_addr_t offset)
     switch(offset) {
         case FB_GET_WIDTH:
             ret = s->qfbuff->width;
-            printf("FB_GET_WIDTH => %d\n", ret);
+            //printf("FB_GET_WIDTH => %d\n", ret);
             break;
 
         case FB_GET_HEIGHT:
             ret = s->qfbuff->height;
-            printf( "FB_GET_HEIGHT = %d\n", ret);
+            //printf( "FB_GET_HEIGHT = %d\n", ret);
             break;
 
         case FB_INT_STATUS:
