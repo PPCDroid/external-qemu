@@ -2534,7 +2534,11 @@ int main(int argc, char **argv)
         static char  params[1024];
         char        *p = params, *end = p + sizeof(params);
 
+#ifndef TARGET_PPC
         p = bufprint(p, end, "qemu=1 console=ttyS0" );
+#else
+        p = bufprint(p, end, "qemu=1 console=ttyS1" );
+#endif
 
         if (opts->shell || opts->logcat) {
             p = bufprint(p, end, " androidboot.console=ttyS%d", shell_serial );
