@@ -71,16 +71,22 @@ static uint32_t silverbox_tty_read(void *opaque, target_phys_addr_t offset)
 {
     struct tty_state *s = (struct tty_state *)opaque;
     offset -= s->base;
+    int ret = 0;
 
     //printf("silverbox_tty_read %x %x\n", offset, size);
 
     switch (offset) {
         case TTY_BYTES_READY:
-            return s->data_count;
+            ret = s->data_count;
+            break;
     default:
         cpu_abort (cpu_single_env, "%s: Bad offset %x\n", __func__, offset);
-        return 0;
+        break;
     }
+#ifdef TARGET_WORDS_BIGENDIAN
+    ret = bswap32(ret);
+#endif
+    return ret;
 }
 
 static void silverbox_tty_write(void *opaque, target_phys_addr_t offset, uint32_t value)
@@ -89,6 +95,9 @@ static void silverbox_tty_write(void *opaque, target_phys_addr_t offset, uint32_
     offset -= s->base;
 
     //printf("silverbox_tty_read %x %x %x\n", offset, value, size);
+#ifdef TARGET_WORDS_BIGENDIAN
+    value = bswap32(value);
+#endif
 
     switch(offset) {
         case TTY_PUT_CHAR: {
