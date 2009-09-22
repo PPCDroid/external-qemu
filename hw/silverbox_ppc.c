@@ -111,6 +111,18 @@ static int vga_osi_call (CPUState *env)
     return 1; /* osi_call handled */
 }
 
+/* Audio support */
+//#ifdef HAS_AUDIO
+static void audio_init (PCIBus *pci_bus)
+{
+    AudioState *s;
+    extern int es1370_init(PCIBus *, AudioState *);
+
+    s = AUD_init ();
+    es1370_init (pci_bus, s);
+}
+//#endif
+
 static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
                                const char *boot_device,
                                DisplayState *ds,
@@ -302,7 +314,8 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     escc_mem_index = escc_init(0x80013000, pic[0x0f], pic[0x10], serial_hds[0],
                                serial_hds[1], ESCC_CLOCK, 4);
 
-    silverbox_tty_add(serial_hds[2], 2, 0xfe201400, pic[9]);
+    silverbox_tty_add(serial_hds[2], 2, 0xfe201800, pic[9]);
+    silverbox_tty_add(serial_hds[3], 3, 0xfe201c00, pic[10]);
 
     for(i = 0; i < nb_nics; i++) {
         if (!nd_table[i].model)
@@ -310,41 +323,10 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
         pci_nic_init(pci_bus, &nd_table[i], -1);
     }
 
-    /* First IDE channel is a CMD646 on the PCI bus */
-
-    if (drive_get_max_bus(IF_IDE) >= MAX_IDE_BUS) {
-        fprintf(stderr, "qemu: too many IDE bus\n");
-        exit(1);
-    }
-    index = drive_get_index(IF_IDE, 0, 0);
-    if (index == -1)
-        hd[0] = NULL;
-    else
-        hd[0] =  drives_table[index].bdrv;
-    index = drive_get_index(IF_IDE, 0, 1);
-    if (index == -1)
-        hd[1] = NULL;
-    else
-        hd[1] =  drives_table[index].bdrv;
-    hd[3] = hd[2] = NULL;
-    pci_cmd646_ide_init(pci_bus, hd, 0);
-
-    /* Second IDE channel is a MAC IDE on the MacIO bus */
-    index = drive_get_index(IF_IDE, 1, 0);
-    if (index == -1)
-        hd[0] = NULL;
-    else
-        hd[0] =  drives_table[index].bdrv;
-    index = drive_get_index(IF_IDE, 1, 1);
-    if (index == -1)
-        hd[1] = NULL;
-    else
-        hd[1] =  drives_table[index].bdrv;
-
-    dbdma = DBDMA_init(&dbdma_mem_index);
-
-    ide_mem_index[0] = -1;
-    ide_mem_index[1] = pmac_ide_init(hd, pic[0x0D], dbdma, 0x16, pic[0x02]);
+    /* Sound card */
+//#ifdef HAS_AUDIO
+    audio_init(pci_bus);
+//#endif
 
     /* cuda also initialize ADB */
     cuda_init(&cuda_mem_index, pic[0x12]);
