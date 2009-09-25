@@ -111,6 +111,21 @@ static int vga_osi_call (CPUState *env)
     return 1; /* osi_call handled */
 }
 
+/* Network support */
+static void network_init (PCIBus *pci_bus)
+{
+    int i;
+    NICInfo *nd = &nd_table[0];
+    int devfn = -1;
+    extern void pci_pcnet_init(PCIBus *bus, NICInfo *nd, int devfn);
+
+    if (!nd->model || strcmp(nd->model, "pcnet") == 0) {
+        /* The malta board has a PCNet card using PCI SLOT 11 */
+        devfn = 88;
+        pci_pcnet_init(pci_bus, nd, devfn);
+    }
+}
+
 /* Audio support */
 //#ifdef HAS_AUDIO
 static void audio_init (PCIBus *pci_bus)
@@ -317,11 +332,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     silverbox_tty_add(serial_hds[2], 2, 0xfe201800, pic[9]);
     silverbox_tty_add(serial_hds[3], 3, 0xfe201c00, pic[10]);
 
-    for(i = 0; i < nb_nics; i++) {
-        if (!nd_table[i].model)
-            nd_table[i].model = "ne2k_pci";
-        pci_nic_init(pci_bus, &nd_table[i], -1);
-    }
+    network_init(pci_bus);
 
     /* Sound card */
 //#ifdef HAS_AUDIO
@@ -332,7 +343,7 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     cuda_init(&cuda_mem_index, pic[0x12]);
 
     adb_kbd_init(&adb_bus);
-//    adb_mouse_init(&adb_bus);
+    adb_mouse_init(&adb_bus);
 
     nvr = macio_nvram_init(&nvram_mem_index, 0x2000, 4);
     pmac_format_nvram_partition(nvr, 0x2000);
