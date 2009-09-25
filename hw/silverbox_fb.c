@@ -357,7 +357,6 @@ static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
             s->fb_base = val;
 #ifdef TARGET_WORDS_BIGENDIAN
             s->fb_base = change_endianness(s->fb_base);
-            printf("%s: set base to 0x%x\n", __func__, s->fb_base);
 #endif
             s->int_status &= ~FB_INT_BASE_UPDATE_DONE;
             s->need_update = 1;
