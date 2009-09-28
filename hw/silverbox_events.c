@@ -168,16 +168,19 @@ static uint32_t events_read(void *x, target_phys_addr_t off)
     int offset = off - s->base;
     uint32_t ret = 0;
 
-    if (offset == REG_READ)
+    if (offset == REG_READ) {
         ret = dequeue_event(s);
-    else if (offset == REG_LEN)
+#ifdef TARGET_WORDS_BIGENDIAN
+        ret = change_endianness(ret);
+#endif
+    } else if (offset == REG_LEN) {
         ret = get_page_len(s);
-    else if (offset >= REG_DATA)
+#ifdef TARGET_WORDS_BIGENDIAN
+        ret = change_endianness(ret);
+#endif
+    } else if (offset >= REG_DATA)
         ret = get_page_data(s, offset - REG_DATA);
 
-#ifdef TARGET_WORDS_BIGENDIAN
-    ret = change_endianness(ret);
-#endif
    return ret;
 }
 
@@ -388,7 +391,7 @@ void events_dev_init(uint32_t base, qemu_irq irq)
 
     iomemtype = cpu_register_io_memory(0, events_readfn, events_writefn, s);
 
-    cpu_register_physical_memory(base, 0x800, iomemtype);
+    cpu_register_physical_memory(base, 0x400, iomemtype);
 
     qemu_add_kbd_event_handler(events_put_keycode, s);
     qemu_add_mouse_event_handler(events_put_mouse, s, 1, "silvermouse");
