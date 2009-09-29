@@ -334,7 +334,42 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
 
     network_init(pci_bus);
 
-    /* Sound card */
+    /* First IDE channel is a CMD646 on the PCI bus */
+
+    if (drive_get_max_bus(IF_IDE) >= MAX_IDE_BUS) {
+        fprintf(stderr, "qemu: too many IDE bus\n");
+        exit(1);
+    }
+    index = drive_get_index(IF_IDE, 0, 0);
+    if (index == -1)
+        hd[0] = NULL;
+    else
+        hd[0] =  drives_table[index].bdrv;
+    index = drive_get_index(IF_IDE, 0, 1);
+    if (index == -1)
+        hd[1] = NULL;
+    else
+        hd[1] =  drives_table[index].bdrv;
+    hd[3] = hd[2] = NULL;
+    pci_cmd646_ide_init(pci_bus, hd, 0);
+
+    /* Second IDE channel is a MAC IDE on the MacIO bus */
+    index = drive_get_index(IF_IDE, 1, 0);
+    if (index == -1)
+        hd[0] = NULL;
+    else
+        hd[0] =  drives_table[index].bdrv;
+    index = drive_get_index(IF_IDE, 1, 1);
+    if (index == -1)
+        hd[1] = NULL;
+    else
+        hd[1] =  drives_table[index].bdrv;
+
+    dbdma = DBDMA_init(&dbdma_mem_index);
+
+    ide_mem_index[0] = -1;
+    ide_mem_index[1] = pmac_ide_init(hd, pic[0x0D], dbdma, 0x16, pic[0x02]);
+
 //#ifdef HAS_AUDIO
     audio_init(pci_bus);
 //#endif
