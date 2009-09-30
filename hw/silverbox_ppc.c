@@ -377,9 +377,6 @@ static void ppc_heathrow_init (ram_addr_t ram_size, int vga_ram_size,
     /* cuda also initialize ADB */
     cuda_init(&cuda_mem_index, pic[0x12]);
 
-    adb_kbd_init(&adb_bus);
-    adb_mouse_init(&adb_bus);
-
     nvr = macio_nvram_init(&nvram_mem_index, 0x2000, 4);
     pmac_format_nvram_partition(nvr, 0x2000);
 
