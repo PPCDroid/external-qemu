@@ -325,7 +325,7 @@ static void nand_dev_write(void *opaque, target_phys_addr_t offset, uint32_t val
     nand_dev_state *s = (nand_dev_state *)opaque;
 
 #ifdef TARGET_WORDS_BIGENDIAN
-    value = change_endianness(value);
+    value = bswap32(value);
 #endif
 
     offset -= s->base;
@@ -417,7 +417,7 @@ static uint32_t nand_dev_read(void *opaque, target_phys_addr_t offset)
 
 out:
 #ifdef TARGET_WORDS_BIGENDIAN
-    ret = change_endianness(ret);
+    ret = bswap32(ret);
 #endif
     return ret;
 }

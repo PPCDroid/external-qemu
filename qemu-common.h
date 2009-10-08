@@ -146,12 +146,4 @@ struct pcmcia_card_s;
 void cpu_save(QEMUFile *f, void *opaque);
 int cpu_load(QEMUFile *f, void *opaque, int version_id);
 
-static uint32_t change_endianness(uint32_t val)
-{
-    uint8_t *p = (uint8_t *)&val;
-    val = (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3];
-    return val;
-}
-
-
 #endif

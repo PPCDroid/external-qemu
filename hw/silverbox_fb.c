@@ -334,7 +334,7 @@ static uint32_t silverbox_fb_read(void *opaque, target_phys_addr_t offset)
             return 0;
     }
 #ifdef TARGET_WORDS_BIGENDIAN
-   ret = change_endianness(ret);
+   ret = bswap32(ret);
 #endif
     return ret;
 }
@@ -348,7 +348,7 @@ static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
         case FB_INT_ENABLE:
             s->int_enable = val;
 #ifdef TARGET_WORDS_BIGENDIAN
-            s->int_enable = change_endianness(s->int_enable);
+            s->int_enable = bswap32(s->int_enable);
 #endif
             qemu_set_irq(s->irq, (s->int_status & s->int_enable));
             break;
@@ -356,7 +356,7 @@ static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
             int need_resize = !s->base_valid;
             s->fb_base = val;
 #ifdef TARGET_WORDS_BIGENDIAN
-            s->fb_base = change_endianness(s->fb_base);
+            s->fb_base = bswap32(s->fb_base);
 #endif
             s->int_status &= ~FB_INT_BASE_UPDATE_DONE;
             s->need_update = 1;
@@ -376,12 +376,12 @@ static void silverbox_fb_write(void *opaque, target_phys_addr_t offset,
         case FB_SET_ROTATION:
             //printf( "FB_SET_ROTATION %d\n", val);
 #ifdef TARGET_WORDS_BIGENDIAN
-            s->set_rotation = change_endianness(s->set_rotation);
+            s->set_rotation = bswap32(s->set_rotation);
 #endif
             break;
         case FB_SET_BLANK:
 #ifdef TARGET_WORDS_BIGENDIAN
-            s->blank = change_endianness(s->blank);
+            s->blank = bswap32(s->blank);
 #endif
             s->need_update = 1;
             break;

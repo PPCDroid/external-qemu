@@ -171,12 +171,12 @@ static uint32_t events_read(void *x, target_phys_addr_t off)
     if (offset == REG_READ) {
         ret = dequeue_event(s);
 #ifdef TARGET_WORDS_BIGENDIAN
-        ret = change_endianness(ret);
+        ret = bswap32(ret);
 #endif
     } else if (offset == REG_LEN) {
         ret = get_page_len(s);
 #ifdef TARGET_WORDS_BIGENDIAN
-        ret = change_endianness(ret);
+        ret = bswap32(ret);
 #endif
     } else if (offset >= REG_DATA)
         ret = get_page_data(s, offset - REG_DATA);
@@ -190,7 +190,7 @@ static void events_write(void *x, target_phys_addr_t off, uint32_t val)
     int offset = off - s->base;
     if (offset == REG_SET_PAGE)
 #ifdef TARGET_WORDS_BIGENDIAN
-        s->page = change_endianness(val);
+        s->page = bswap32(val);
 #else
         s->page = val;
 #endif

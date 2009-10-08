@@ -60,7 +60,7 @@ static uint32_t silverbox_rtc_read(void *opaque, target_phys_addr_t offset)
     }
 out:
 #ifdef TARGET_WORDS_BIGENDIAN
-    ret = change_endianness(ret);
+    ret = bswap32(ret);
 #endif
     return ret;
 }
@@ -71,7 +71,7 @@ static void silverbox_rtc_write(void *opaque, target_phys_addr_t offset, uint32_
     int64_t alarm;
 
 #ifdef TARGET_WORDS_BIGENDIAN
-    value = change_endianness(value);
+    value = bswap32(value);
 #endif
 
     offset -= s->base;

@@ -411,7 +411,7 @@ static uint32_t silverbox_mmc_read(void *opaque, target_phys_addr_t offset)
     }
 out:
 #ifdef TARGET_WORDS_BIGENDIAN
-    ret = change_endianness(ret);
+    ret = bswap32(ret);
 #endif
     return ret;
 }
@@ -424,7 +424,7 @@ static void silverbox_mmc_write(void *opaque, target_phys_addr_t offset, uint32_
     offset -= s->base;
 
 #ifdef TARGET_WORDS_BIGENDIAN
-    val = change_endianness(val);
+    val = bswap32(val);
 #endif
 
     switch(offset) {
