@@ -279,7 +279,7 @@ static void silverbox_fb_update_display(void *opaque)
                                     base + y_last * width * 2,
                                     VGA_DIRTY_FLAG);
 
-    qframebuffer_update( s->qfbuff, n, y_first, width, y_last-y_first );
+    qframebuffer_update( s->qfbuff, n, y_first, width-n, y_last-y_first );
 }
 
 static void silverbox_fb_invalidate_display(void * opaque)
