@@ -483,18 +483,13 @@ static void audio_init (PCIBus *pci_bus)
 #endif
 
 /* Network support */
-static void network_init (PCIBus *pci_bus)
+static void network_init(uint32_t base, qemu_irq irq)
 {
-    int i;
     NICInfo *nd = &nd_table[0];
-    int devfn = -1;
-    extern void pci_pcnet_init(PCIBus *bus, NICInfo *nd, int devfn);
+    extern void smc91c111_init(NICInfo *nd, uint32_t base, qemu_irq irq);
 
-    if (!nd->model || strcmp(nd->model, "pcnet") == 0) {
-        /* The malta board has a PCNet card using PCI SLOT 11 */
-        devfn = 88;
-        pci_pcnet_init(pci_bus, nd, devfn);
-    }
+    if (!nd->model || strcmp(nd->model, "smc91c111") == 0)
+        smc91c111_init(nd, base, irq);
 }
 
 /* ROM and pseudo bootloader
@@ -908,7 +903,7 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
 #endif
 
     /* Network card */
-    network_init(pci_bus);
+    network_init(0x1e002000, i8259[13]);
 
 #if 1
     silverbox_fb_init(ds, 0x1e001400, i8259[12]);

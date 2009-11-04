@@ -706,7 +706,7 @@ HW_SOURCES := irq.c \
 	      cirrus_vga.c \
 	      silverbox_fb.c \
 	      vga.c \
-	      pcnet.c \
+	      smc91c111.c \
 	      silverbox_rtc.c \
 	      silverbox_nand.c \
 	      silverbox_events.c \
@@ -760,7 +760,7 @@ LOCAL_SRC_FILES += exec.c cpu-exec.c  \
 		   hw/usb-uhci.c \
 		   hw/gt64xxx.c \
 		   hw/i8254.c \
-		   hw/pcnet.c \
+	           hw/smc91c111.c \
 		   hw/serial.c \
 		   hw/parallel.c \
 		   translate-all.c \
