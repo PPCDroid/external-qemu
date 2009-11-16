@@ -472,13 +472,9 @@ static MaltaFPGAState *malta_fpga_init(target_phys_addr_t base, qemu_irq uart_ir
 
 /* Audio support */
 #ifdef HAS_AUDIO
-static void audio_init (PCIBus *pci_bus)
+static void audio_init(uint32_t base, qemu_irq *irq)
 {
-    AudioState *s;
-    extern int es1370_init(PCIBus *, AudioState *);
-
-    s = AUD_init ();
-    es1370_init (pci_bus, s);
+    silverbox_audio_init(base, irq, audio_input_source);
 }
 #endif
 
@@ -899,7 +895,7 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
 
     /* Sound card */
 #ifdef HAS_AUDIO
-    audio_init(pci_bus);
+    audio_init(0x1e003000, i8259[14]);
 #endif
 
     /* Network card */

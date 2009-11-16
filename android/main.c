@@ -1743,7 +1743,7 @@ int main(int argc, char **argv)
 #if defined (TARGET_ARM)
     unsigned  defaultPartitionSize = 0x4200000;
 #elif defined (TARGET_MIPS)
-    unsigned  defaultPartitionSize = 0x14a00000;
+    unsigned  defaultPartitionSize = 0xc600000;
 #elif defined (TARGET_PPC)
     unsigned  defaultPartitionSize = 0x8400000;
 #else

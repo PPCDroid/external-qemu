@@ -797,7 +797,7 @@ AUDIO_SOURCES := audio.c noaudio.c wavaudio.c sdlaudio.c wavcapture.c mixeng.c
 AUDIO_CFLAGS  := -I$(LOCAL_PATH)/audio -DHAS_AUDIO
 AUDIO_LDLIBS  :=
 
-AUDIO_SOURCES += es1370.c
+AUDIO_SOURCES += es1370.c silverbox_audio.c
 
 ifeq ($(HOST_OS),darwin)
   CONFIG_COREAUDIO ?= yes
@@ -1035,7 +1035,7 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/avd/info.c \
 	      hw/silverbox_mips.c
 
-VL_SOURCES += hw/es1370.c
+VL_SOURCES += hw/es1370.c hw/silverbox_audio.c
 
 # we need to add a Quartz-specific file
 ifeq ($(HOST_OS),darwin)
