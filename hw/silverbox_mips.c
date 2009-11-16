@@ -872,7 +872,7 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     DMA_init(0);
 
     events_dev_init(0x1e000000, i8259[7]);
-    silverbox_rtc_init(0x1e000400);
+    silverbox_rtc_init(0x1e000400, i8259[6]);
 
 #ifdef CONFIG_NAND
     nand_dev_init(0x1e000800);
