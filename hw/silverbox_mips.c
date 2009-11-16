@@ -905,18 +905,7 @@ void mips_malta_init (ram_addr_t ram_size, int vga_ram_size,
     /* Network card */
     network_init(0x1e002000, i8259[13]);
 
-#if 1
     silverbox_fb_init(ds, 0x1e001400, i8259[12]);
-#else
-    /* Optional PCI video card */
-    if (cirrus_vga_enabled) {
-       pci_cirrus_vga_init(pci_bus, ds, phys_ram_base + ram_size,
-                            ram_size, vga_ram_size);
-    } else if (std_vga_enabled) {
-        pci_vga_init(pci_bus, ds, phys_ram_base + ram_size,
-                     ram_size, vga_ram_size, 0, 0);
-    }
-#endif
 }
 
 QEMUMachine mips_malta_machine = {
