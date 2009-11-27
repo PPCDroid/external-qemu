@@ -474,7 +474,9 @@ static MaltaFPGAState *malta_fpga_init(target_phys_addr_t base, qemu_irq uart_ir
 #ifdef HAS_AUDIO
 static void audio_init(uint32_t base, qemu_irq *irq)
 {
-    silverbox_audio_init(base, irq, audio_input_source);
+    AudioState *s;
+    s = AUD_init();
+    silverbox_audio_init(base, irq, audio_input_source, s);
 }
 #endif
 

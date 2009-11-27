@@ -455,7 +455,7 @@ static CPUWriteMemoryFunc *silverbox_audio_writefn[] = {
    silverbox_audio_write
 };
 
-void silverbox_audio_init(uint32_t base, qemu_irq irq, const char* input_source)
+void silverbox_audio_init(uint32_t base, qemu_irq irq, const char* input_source, AudioState *audio)
 {
     struct silverbox_audio_state *s;
     audsettings_t as;
@@ -480,7 +480,7 @@ void silverbox_audio_init(uint32_t base, qemu_irq irq, const char* input_source)
      }
 #endif
 
-    AUD_register_card( &glob_audio_state, "silverbox_audio", &s->card);
+    AUD_register_card( audio, "silverbox_audio", &s->card);
 
     as.freq = 44100;
     as.nchannels = 2;
