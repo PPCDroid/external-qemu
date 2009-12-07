@@ -2904,6 +2904,8 @@ void  android_emulation_setup( void )
              * under VMWare.
              */
             BEGIN_NOSIGALRM
+/*NS: Disable google statistics gathering*/
+#if 0
                 pid = fork();
                 if (pid == 0) {
                     int  fd = open("/dev/null", O_WRONLY);
@@ -2911,6 +2913,7 @@ void  android_emulation_setup( void )
                     dup2(fd, 2);
                     execl( tmp, _ANDROID_PING_PROGRAM, "ping", "emulator", VERSION_STRING, NULL );
                 }
+#endif
             END_NOSIGALRM
 
             /* don't do anything in the parent or in case of error */
