@@ -1013,6 +1013,7 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/hw-control.c \
               android/hw-events.c \
               android/hw-kmsg.c \
+              android/hw-lcd.c \
               android/hw-qemud.c \
               android/hw-sensors.c \
               android/main.c \
@@ -1021,7 +1022,6 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/utils/bufprint.c \
               android/utils/debug.c \
               android/utils/dirscanner.c \
-              android/utils/display.c \
               android/utils/ini.c \
               android/utils/filelock.c \
               android/utils/misc.c \
@@ -1585,6 +1585,7 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/hw-control.c \
               android/hw-events.c \
               android/hw-kmsg.c \
+              android/hw-lcd.c \
               android/hw-qemud.c \
               android/hw-sensors.c \
               android/main.c \
@@ -1593,7 +1594,6 @@ VL_SOURCES := vl.c osdep.c cutils.c \
               android/utils/bufprint.c \
               android/utils/debug.c \
               android/utils/dirscanner.c \
-              android/utils/display.c \
               android/utils/ini.c \
               android/utils/filelock.c \
               android/utils/misc.c \
